@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     # 第三方库
     'rest_framework',
     'rest_framework_simplejwt',
+    'channels',
 
     # 自定义app
     'xiaohongshu_backend.users.apps.UsersConfig',
@@ -157,3 +159,25 @@ SIMPLE_JWT = {
 # 媒体文件配置
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# ASGI & Channels 配置
+import sys
+
+ASGI_APPLICATION = "xiaohongshu_backend.asgi.application"
+
+# Use in-memory channel layer for tests to avoid redis dependency
+if 'test' in sys.argv:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [("127.0.0.1", 6379)],
+            },
+        },
+    }

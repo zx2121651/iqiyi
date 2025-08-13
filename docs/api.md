@@ -526,3 +526,31 @@
 - **Authentication**: **需要认证**。
 - **Request Body**: `{"text": "Your first message"}`
 - **Success Response (201 Created)**: (返回新创建的 Message 对象)
+
+### 9.5 实时消息 (WebSocket)
+
+- **Endpoint**: `ws/conversations/<conversation_id>/`
+- **Protocol**: WebSocket
+- **Description**: 连接到此端点以进行实时的双向消息通信。连接需要有效的用户认证（通过Cookie或Token）。
+- **Authentication**: **需要认证**。
+
+**从客户端发送消息**:
+客户端应发送一个JSON字符串，格式如下:
+```json
+{
+    "message": "Hello from the client!"
+}
+```
+
+**从服务器接收消息**:
+服务器会广播JSON格式的消息给会话中的所有客户端，格式如下:
+```json
+{
+    "id": 3,
+    "sender": "otheruser",
+    "text": "Hello from the server!",
+    "created_at": "2023-10-28T14:05:00Z",
+    "is_me": false
+}
+```
+`is_me` 字段帮助客户端判断消息是自己发送的还是对方发送的，便于UI显示。
