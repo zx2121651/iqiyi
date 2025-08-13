@@ -341,3 +341,23 @@
 - **Description**: 获取指定ID用户正在关注的用户列表。
 - **Authentication**: 无需认证。
 - **Success Response (200 OK)**: (返回一个 `UserSerializer` 序列化的用户列表)
+
+---
+
+## 6. 信息流 (Feeds)
+
+### 6.1 获取“关注”信息流
+
+- **Endpoint**: `feed/following/`
+- **Method**: `GET`
+- **Description**: 获取当前用户所关注的人发布的笔记列表，按时间倒序排列。
+- **Authentication**: **需要认证**。
+- **Success Response (200 OK)**: (返回一个 `NoteSerializer` 序列化的笔记分页列表)
+
+### 6.2 获取“发现”信息流
+
+- **Endpoint**: `feed/explore/`
+- **Method**: `GET`
+- **Description**: 获取平台上的所有笔记，用于“发现”或“广场”功能，按时间倒序排列。
+- **Authentication**: 无需认证。
+- **Success Response (200 OK)**: (返回一个 `NoteSerializer` 序列化的笔记分页列表)
