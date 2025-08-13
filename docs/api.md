@@ -449,3 +449,80 @@
       "status": "all notifications marked as read"
   }
   ```
+
+---
+
+## 9. 私信 (Messaging)
+
+### 9.1 获取会话列表
+
+- **Endpoint**: `conversations/`
+- **Method**: `GET`
+- **Description**: 获取当前登录用户的所有私信会话列表，按最新消息时间排序。
+- **Authentication**: **需要认证**。
+- **Success Response (200 OK)**:
+  ```json
+  [
+      {
+          "id": 1,
+          "other_participant": {
+              "id": 2,
+              "username": "otheruser",
+              "nickname": "Other's Nickname",
+              "avatar": "/media/avatars/other.jpg"
+          },
+          "last_message": {
+              "text": "Hi, User1!",
+              "created_at": "2023-10-28T14:00:00Z",
+              "is_read": false
+          },
+          "updated_at": "2023-10-28T14:00:00Z"
+      }
+  ]
+  ```
+
+### 9.2 获取会话的历史消息
+
+- **Endpoint**: `conversations/<conversation_id>/messages/`
+- **Method**: `GET`
+- **Description**: 获取指定会话中的消息列表，按时间正序排列。获取时，属于对方的消息会自动标记为已读。
+- **Authentication**: **需要认证**。
+- **Success Response (200 OK)**:
+  ```json
+  [
+      {
+          "id": 1,
+          "sender": { ... },
+          "text": "Hello!",
+          "created_at": "2023-10-28T13:59:00Z",
+          "is_read": true,
+          "is_me": true
+      },
+      {
+          "id": 2,
+          "sender": { ... },
+          "text": "Hi, User1!",
+          "created_at": "2023-10-28T14:00:00Z",
+          "is_read": true,
+          "is_me": false
+      }
+  ]
+  ```
+
+### 9.3 发送消息
+
+- **Endpoint**: `conversations/<conversation_id>/messages/`
+- **Method**: `POST`
+- **Description**: 在一个已存在的会话中发送一条新消息。
+- **Authentication**: **需要认证**。
+- **Request Body**: `{"text": "Your message here"}`
+- **Success Response (201 Created)**: (返回新创建的 Message 对象)
+
+### 9.4 发起新会话并发送第一条消息
+
+- **Endpoint**: `users/<recipient_id>/messages/`
+- **Method**: `POST`
+- **Description**: 与指定用户发起一个新的会话（如果会话已存在，则直接使用现有会话）并发送第一条消息。
+- **Authentication**: **需要认证**。
+- **Request Body**: `{"text": "Your first message"}`
+- **Success Response (201 Created)**: (返回新创建的 Message 对象)

@@ -144,4 +144,29 @@
 
 ---
 
+### 私信模块 (`messaging`)
+
+#### 模型: `Conversation` (会话)
+
+| 字段名 | 类型 | 说明 | 备注 |
+| :--- | :--- | :--- | :--- |
+| `id` | AutoField | 主键 | Django 自动创建 |
+| `participants` | ManyToManyField | 参与者 | 指向 `users.User` 模型 |
+| `created_at` | DateTimeField | 创建时间 | 自动记录 |
+| `updated_at` | DateTimeField | 更新时间 | 自动记录，有新消息时更新 |
+
+#### 模型: `Message` (消息)
+
+| 字段名 | 类型 | 说明 | 备注 |
+| :--- | :--- | :--- | :--- |
+| `id` | AutoField | 主键 | Django 自动创建 |
+| `conversation` | ForeignKey | 所属会话 | 指向 `messaging.Conversation` |
+| `sender` | ForeignKey | 发送者 | 指向 `users.User` |
+| `text` | TextField | 消息内容 | - |
+| `created_at` | DateTimeField | 创建时间 | 自动记录 |
+| `is_read` | BooleanField | 是否已读 | 默认为 `False` |
+
+
+---
+
 *（随着项目功能的增加，此文档将持续更新...）*

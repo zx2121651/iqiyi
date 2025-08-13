@@ -28,6 +28,7 @@ urlpatterns = [
     path("api/v1/feed/", include("xiaohongshu_backend.feeds.urls")),
     path("api/v1/search/", include("xiaohongshu_backend.search.urls")),
     path("api/v1/notifications/", include("xiaohongshu_backend.notifications.urls")),
+    path("api/v1/", include("xiaohongshu_backend.messaging.urls")),
 ]
 
 if settings.DEBUG:

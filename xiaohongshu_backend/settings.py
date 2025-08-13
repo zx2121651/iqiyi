@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'xiaohongshu_backend.feeds.apps.FeedsConfig',
     'xiaohongshu_backend.search.apps.SearchConfig',
     'xiaohongshu_backend.notifications.apps.NotificationsConfig',
+    'xiaohongshu_backend.messaging.apps.MessagingConfig',
 ]
 
 MIDDLEWARE = [
