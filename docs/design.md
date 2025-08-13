@@ -125,6 +125,23 @@
 
 *注: `follower` 和 `followed` 字段上设置了联合唯一约束。*
 
+### 通知模块 (`notifications`)
+
+#### 模型: `Notification` (通知)
+
+使用Django的 `ContentType` 框架来实现通用外键，使通知可以指向任何其他模型对象。
+
+| 字段名 | 类型 | 说明 | 备注 |
+| :--- | :--- | :--- | :--- |
+| `id` | AutoField | 主键 | Django 自动创建 |
+| `recipient` | ForeignKey | 接收者 | 指向 `users.User`，通知的接收方 |
+| `sender` | ForeignKey | 发送者 | 指向 `users.User`，触发通知的用户 |
+| `verb` | CharField | 通知类型 | 如 'like', 'comment', 'follow' 等 |
+| `action_object` | GenericForeignKey | 动作对象 | 指向触发动作的实例，如一个`Like`或`Comment`对象 |
+| `is_read` | BooleanField | 是否已读 | 默认为 `False` |
+| `created_at` | DateTimeField | 创建时间 | 自动记录 |
+
+
 ---
 
 *（随着项目功能的增加，此文档将持续更新...）*

@@ -389,3 +389,63 @@
 - **Query Parameters**:
     - `q` (string, required): 搜索的关键词。
 - **Success Response (200 OK)**: (返回一个 `UserSerializer` 序列化的用户列表)
+
+---
+
+## 8. 通知 (Notifications)
+
+### 8.1 获取通知列表
+
+- **Endpoint**: `notifications/`
+- **Method**: `GET`
+- **Description**: 获取当前登录用户的通知列表。
+- **Authentication**: **需要认证**。
+- **Query Parameters**:
+    - `unread` (boolean, optional): 如果为 `true`，则只返回未读通知。
+- **Success Response (200 OK)**:
+  ```json
+  [
+      {
+          "id": 1,
+          "sender": { "id": 2, "username": "otheruser", "...": "..." },
+          "verb": "follow",
+          "action_object": { "id": 2, "username": "otheruser", "...": "..." },
+          "is_read": false,
+          "created_at": "2023-10-28T10:00:00Z"
+      },
+      {
+          "id": 2,
+          "sender": { "id": 3, "username": "anotheruser", "...": "..." },
+          "verb": "like",
+          "action_object": { "id": 5, "title": "My Note Title" },
+          "is_read": true,
+          "created_at": "2023-10-28T09:00:00Z"
+      }
+  ]
+  ```
+
+### 8.2 将单条通知标记为已读
+
+- **Endpoint**: `notifications/<id>/mark-as-read/`
+- **Method**: `POST`
+- **Description**: 将指定的单条通知标记为已读。
+- **Authentication**: **需要认证**。
+- **Success Response (200 OK)**:
+  ```json
+  {
+      "status": "notification marked as read"
+  }
+  ```
+
+### 8.3 将所有通知标记为已读
+
+- **Endpoint**: `notifications/mark-all-as-read/`
+- **Method**: `POST`
+- **Description**: 将当前用户的所有未读通知一键标记为已读。
+- **Authentication**: **需要认证**。
+- **Success Response (200 OK)**:
+  ```json
+  {
+      "status": "all notifications marked as read"
+  }
+  ```
