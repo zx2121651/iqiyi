@@ -76,6 +76,52 @@
 | `uploaded_at`| DateTimeField | 上传时间 | 自动记录上传时的时间 |
 
 
+### 交互模块 (`interactions`)
+
+#### 模型: `Comment` (评论)
+
+| 字段名 | 类型 | 说明 | 备注 |
+| :--- | :--- | :--- | :--- |
+| `id` | AutoField | 主键 | Django 自动创建 |
+| `author` | ForeignKey | 作者 | 指向 `users.User` 模型 |
+| `note` | ForeignKey | 所属笔记 | 指向 `notes.Note` 模型 |
+| `content` | TextField | 评论内容 | - |
+| `parent` | ForeignKey | 父评论 | 指向自身，用于实现二级回复 |
+| `created_at` | DateTimeField | 创建时间 | 自动记录 |
+
+#### 模型: `Like` (点赞)
+
+| 字段名 | 类型 | 说明 | 备注 |
+| :--- | :--- | :--- | :--- |
+| `id` | AutoField | 主键 | Django 自动创建 |
+| `user` | ForeignKey | 点赞用户 | 指向 `users.User` 模型 |
+| `note` | ForeignKey | 被点赞的笔记 | 指向 `notes.Note` 模型 |
+| `created_at` | DateTimeField | 点赞时间 | 自动记录 |
+
+*注: `user` 和 `note` 字段上设置了联合唯一约束。*
+
+#### 模型: `Favorite` (收藏)
+
+| 字段名 | 类型 | 说明 | 备注 |
+| :--- | :--- | :--- | :--- |
+| `id` | AutoField | 主键 | Django 自动创建 |
+| `user` | ForeignKey | 收藏用户 | 指向 `users.User` 模型 |
+| `note` | ForeignKey | 被收藏的笔记 | 指向 `notes.Note` 模型 |
+| `created_at` | DateTimeField | 收藏时间 | 自动记录 |
+
+*注: `user` 和 `note` 字段上设置了联合唯一约束。*
+
+#### 模型: `Follow` (关注)
+
+| 字段名 | 类型 | 说明 | 备注 |
+| :--- | :--- | :--- | :--- |
+| `id` | AutoField | 主键 | Django 自动创建 |
+| `follower` | ForeignKey | 关注者 | 指向 `users.User` 模型 |
+| `followed` | ForeignKey | 被关注者 | 指向 `users.User` 模型 |
+| `created_at` | DateTimeField | 关注时间 | 自动记录 |
+
+*注: `follower` 和 `followed` 字段上设置了联合唯一约束。*
+
 ---
 
-*（随着项目功能的增加，此文档将持续更新，以包含评论、点赞、收藏等模块的模型设计。）*
+*（随着项目功能的增加，此文档将持续更新...）*

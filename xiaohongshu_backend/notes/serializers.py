@@ -17,14 +17,15 @@ class NoteSerializer(serializers.ModelSerializer):
     """
     笔记序列化器
     """
-    # read_only=True 表示这个字段只在序列化输出时使用（GET请求），
-    # 在反序列化输入时（POST/PUT请求）会被忽略。
     author_username = serializers.ReadOnlyField(source='author.username')
     images = NoteImageSerializer(many=True, read_only=True)
 
-    # allow_empty_file=False 告诉DRF，上传的文件不能为空。
-    # write_only=True 表示这个字段只在反序列化输入时使用。
-    # required=False 表示这个字段是可选的。
+    # 动态计算字段
+    likes_count = serializers.IntegerField(read_only=True)
+    comments_count = serializers.IntegerField(read_only=True)
+    is_liked = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
+
     uploaded_images = serializers.ListField(
         child=serializers.ImageField(allow_empty_file=False, use_url=False),
         write_only=True,
@@ -35,8 +36,21 @@ class NoteSerializer(serializers.ModelSerializer):
         model = Note
         fields = [
             'id', 'author_username', 'title', 'content',
-            'created_at', 'updated_at', 'images', 'uploaded_images'
+            'created_at', 'updated_at', 'images', 'uploaded_images',
+            'likes_count', 'comments_count', 'is_liked', 'is_favorited'
         ]
+
+    def get_is_liked(self, obj):
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return obj.likes.filter(user=user).exists()
+
+    def get_is_favorited(self, obj):
+        user = self.context['request'].user
+        if user.is_anonymous:
+            return False
+        return obj.favorites.filter(user=user).exists()
 
     def create(self, validated_data):
         """

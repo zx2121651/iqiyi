@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions
+from django.db.models import Count
 from .models import Note
 from .serializers import NoteSerializer
 from .permissions import IsOwnerOrReadOnly
@@ -7,9 +8,19 @@ class NoteViewSet(viewsets.ModelViewSet):
     """
     一个用于查看和编辑笔记的 ViewSet。
     """
-    queryset = Note.objects.all().prefetch_related('images')
     serializer_class = NoteSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    def get_queryset(self):
+        """
+        重写 get_queryset 以添加注解和预取，优化性能。
+        """
+        return Note.objects.annotate(
+            likes_count=Count('likes', distinct=True),
+            comments_count=Count('comments', distinct=True)
+        ).prefetch_related(
+            'images', 'likes', 'favorites'
+        )
 
     def perform_create(self, serializer):
         """

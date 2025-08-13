@@ -89,32 +89,6 @@
 
 ---
 
-## 2. 用户信息 (Users)
-
-### 2.1 获取当前用户信息
-
-- **Endpoint**: `users/me/`
-- **Method**: `GET`
-- **Description**: 获取当前登录用户的详细信息。
-- **Authentication**: **需要认证**。请求头中必须包含 `Authorization: Bearer <access_token>`。
-
-**Parameters**: 无
-
-**Success Response (200 OK)**:
-
-```json
-{
-    "id": 1,
-    "username": "testuser",
-    "nickname": "我的昵称",
-    "avatar": null,
-    "bio": "这是我的个人简介。",
-    "phone_number": "13912345678"
-}
-```
-
----
-
 ## 3. 笔记 (Notes)
 
 ### 3.1 获取笔记列表
@@ -137,13 +111,11 @@
               "content": "This is the content of my first note.",
               "created_at": "2023-10-27T10:00:00Z",
               "updated_at": "2023-10-27T10:00:00Z",
-              "images": [
-                  {
-                      "id": 1,
-                      "image": "/media/notes_images/my_image.jpg",
-                      "uploaded_at": "2023-10-27T10:00:00Z"
-                  }
-              ]
+              "images": [],
+              "likes_count": 1,
+              "comments_count": 0,
+              "is_liked": true,
+              "is_favorited": false
           }
       ]
   }
@@ -211,3 +183,161 @@
 - **Description**: 删除一篇笔记。只有笔记的作者才能删除。
 - **Authentication**: **需要认证**.
 - **Success Response**: `204 No Content`
+
+---
+
+## 4. 交互 (Interactions)
+
+### 4.1 获取笔记的评论列表
+
+- **Endpoint**: `notes/<note_id>/comments/`
+- **Method**: `GET`
+- **Description**: 获取某篇笔记下的所有顶层评论（回复会在评论对象中嵌套显示）。
+- **Authentication**: 无需认证。
+- **Success Response (200 OK)**:
+  ```json
+  [
+      {
+          "id": 1,
+          "author_username": "commenter",
+          "content": "This is a great note!",
+          "created_at": "2023-10-27T12:00:00Z",
+          "parent": null,
+          "replies": [
+              {
+                  "id": 2,
+                  "author_username": "original_poster",
+                  "content": "Thanks!",
+                  "created_at": "2023-10-27T12:05:00Z"
+              }
+          ]
+      }
+  ]
+  ```
+
+### 4.2 创建新评论
+
+- **Endpoint**: `notes/<note_id>/comments/`
+- **Method**: `POST`
+- **Description**: 为一篇笔记添加新评论。如果提供了 `parent` 字段，则为创建回复。
+- **Authentication**: **需要认证**.
+- **Request Body**: `application/json`
+
+**Parameters**:
+
+| 字段名 | 类型 | 是否必须 | 说明 |
+| :--- | :--- | :--- | :--- |
+| `content` | string | 是 | 评论的内容。 |
+| `parent` | integer | 否 | 父评论的ID，用于回复。 |
+
+**Success Response (201 Created)**: (响应体与列表中的单个对象结构相同)
+
+### 4.3 删除评论
+
+- **Endpoint**: `comments/<comment_id>/`
+- **Method**: `DELETE`
+- **Description**: 删除一条评论。只有评论的作者才能删除。
+- **Authentication**: **需要认证**.
+- **Success Response**: `204 No Content`
+
+### 4.4 点赞/取消点赞笔记
+
+- **Endpoint**: `notes/<note_id>/like/`
+- **Method**: `POST`
+- **Description**: 切换对某篇笔记的点赞状态。第一次请求为点赞，第二次为取消点赞。
+- **Authentication**: **需要认证**.
+- **Success Response**:
+    - `201 Created` (点赞成功时)
+    - `204 No Content` (取消点赞成功时)
+
+### 4.5 收藏/取消收藏笔记
+
+- **Endpoint**: `notes/<note_id>/favorite/`
+- **Method**: `POST`
+- **Description**: 切换对某篇笔记的收藏状态。第一次请求为收藏，第二次为取消收藏。
+- **Authentication**: **需要认证**.
+- **Success Response**:
+    - `201 Created` (收藏成功时)
+    - `204 No Content` (取消收藏成功时)
+
+---
+
+## 5. 用户 (Users)
+
+### 5.1 获取当前用户信息 (`/me`)
+
+- **Endpoint**: `users/me/`
+- **Method**: `GET`
+- **Description**: 获取当前登录用户的个人信息。
+- **Authentication**: **需要认证**。
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "id": 1,
+    "username": "currentuser",
+    "nickname": "My Nickname",
+    "avatar": null,
+    "bio": "My bio here.",
+    "phone_number": "13800138000",
+    "followers_count": 10,
+    "following_count": 5,
+    "is_following": false
+  }
+  ```
+
+### 5.2 获取指定用户公开主页
+
+- **Endpoint**: `users/<id>/`
+- **Method**: `GET`
+- **Description**: 获取指定ID用户的公开主页信息，包含其发布的笔记列表。
+- **Authentication**: 无需认证。
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "id": 2,
+    "username": "otheruser",
+    "nickname": "Other's Nickname",
+    "avatar": null,
+    "bio": "Bio of other user.",
+    "phone_number": null,
+    "followers_count": 25,
+    "following_count": 15,
+    "is_following": true,
+    "notes": [
+        {
+            "id": 10,
+            "author_username": "otheruser",
+            "title": "A great note",
+            "content": "...",
+            "likes_count": 150,
+            "...": "..."
+        }
+    ]
+  }
+  ```
+
+### 5.3 关注/取消关注用户
+
+- **Endpoint**: `users/<id>/follow/`
+- **Method**: `POST`
+- **Description**: 切换对指定ID用户的关注状态。
+- **Authentication**: **需要认证**。
+- **Success Response**:
+    - `201 Created` (关注成功时)
+    - `204 No Content` (取消关注成功时)
+
+### 5.4 获取粉丝列表
+
+- **Endpoint**: `users/<id>/followers/`
+- **Method**: `GET`
+- **Description**: 获取指定ID用户的粉丝列表。
+- **Authentication**: 无需认证。
+- **Success Response (200 OK)**: (返回一个 `UserSerializer` 序列化的用户列表)
+
+### 5.5 获取关注列表
+
+- **Endpoint**: `users/<id>/following/`
+- **Method**: `GET`
+- **Description**: 获取指定ID用户正在关注的用户列表。
+- **Authentication**: 无需认证。
+- **Success Response (200 OK)**: (返回一个 `UserSerializer` 序列化的用户列表)

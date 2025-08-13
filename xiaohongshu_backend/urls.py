@@ -24,6 +24,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/", include("xiaohongshu_backend.users.urls")),
     path("api/v1/", include("xiaohongshu_backend.notes.urls")),
+    path("api/v1/", include("xiaohongshu_backend.interactions.urls")),
 ]
 
 if settings.DEBUG:

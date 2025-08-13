@@ -85,3 +85,71 @@ class UserAuthAPITests(APITestCase):
         """
         response = self.client.get(self.me_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+from xiaohongshu_backend.interactions.models import Follow
+from xiaohongshu_backend.notes.models import Note
+
+class UserProfileAndFollowAPITests(APITestCase):
+    def setUp(self):
+        self.user1 = User.objects.create_user(username='user1', password='password123')
+        self.user2 = User.objects.create_user(username='user2', password='password456')
+        Note.objects.create(author=self.user1, title='Note from User1', content='Content.')
+
+    def test_follow_and_unfollow_user(self):
+        """测试关注和取关用户"""
+        self.client.force_authenticate(user=self.user2)
+        follow_url = reverse('follow-toggle', kwargs={'user_id': self.user1.id})
+
+        # 关注
+        response = self.client.post(follow_url)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Follow.objects.filter(follower=self.user2, followed=self.user1).exists())
+
+        # 取关
+        response = self.client.post(follow_url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Follow.objects.filter(follower=self.user2, followed=self.user1).exists())
+
+    def test_follow_self_not_allowed(self):
+        """测试用户不能关注自己"""
+        self.client.force_authenticate(user=self.user1)
+        follow_url = reverse('follow-toggle', kwargs={'user_id': self.user1.id})
+        response = self.client.post(follow_url)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_get_followers_and_following_list(self):
+        """测试获取粉丝和关注列表"""
+        Follow.objects.create(follower=self.user2, followed=self.user1)
+
+        # 获取 user1 的粉丝列表 (应包含 user2)
+        followers_url = reverse('followers-list', kwargs={'user_id': self.user1.id})
+        response = self.client.get(followers_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['username'], self.user2.username)
+
+        # 获取 user2 的关注列表 (应包含 user1)
+        following_url = reverse('following-list', kwargs={'user_id': self.user2.id})
+        response = self.client.get(following_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]['username'], self.user1.username)
+
+    def test_get_user_profile(self):
+        """测试获取用户公开主页"""
+        # user2 关注 user1
+        Follow.objects.create(follower=self.user2, followed=self.user1)
+
+        # 以 user2 的身份访问 user1 的主页
+        self.client.force_authenticate(user=self.user2)
+        profile_url = reverse('user-detail', kwargs={'pk': self.user1.id})
+        response = self.client.get(profile_url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['username'], self.user1.username)
+        self.assertEqual(response.data['followers_count'], 1)
+        self.assertEqual(response.data['following_count'], 0)
+        self.assertTrue(response.data['is_following'])
+        self.assertEqual(len(response.data['notes']), 1)
+        self.assertEqual(response.data['notes'][0]['title'], 'Note from User1')
