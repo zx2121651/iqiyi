@@ -18,6 +18,32 @@ def get_temporary_image():
     temp_file.seek(0)
     return temp_file
 
+import subprocess
+
+def get_temporary_video():
+    """
+    创建一个临时的mp4视频文件用于测试上传
+    """
+    temp_video = tempfile.NamedTemporaryFile(suffix='.mp4', delete=False)
+    # 使用ffmpeg创建一个1秒钟的红色视频
+    command = [
+        'ffmpeg',
+        '-f', 'lavfi',
+        '-i', 'color=c=red:s=10x10:d=1',
+        '-t', '1',
+        '-y',
+        temp_video.name
+    ]
+    try:
+        subprocess.run(command, check=True, capture_output=True)
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        # 如果ffmpeg失败或未安装，就跳过这个测试
+        # 在CI环境中，我们期望ffmpeg是可用的
+        return None
+
+    temp_video.seek(0)
+    return temp_video
+
 
 class NoteAPITests(APITestCase):
     """
@@ -52,15 +78,24 @@ class NoteAPITests(APITestCase):
 
     def test_create_note_authenticated(self):
         """
-        测试登录用户可以创建笔记
+        测试登录用户可以创建笔记 (此测试已更新为包含图片)
         """
         self.client.force_authenticate(user=self.user2)
-        data = {'title': 'New Note by User2', 'content': 'Some new content.'}
-        response = self.client.post(self.list_create_url, data, format='json')
+        image_file = get_temporary_image()
+        data = {
+            'title': 'New Note by User2',
+            'content': 'Some new content.',
+            'uploaded_images': [image_file]
+        }
+        response = self.client.post(self.list_create_url, data, format='multipart')
+
+        image_file.close()
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Note.objects.count(), 2)
         new_note = Note.objects.get(id=response.data['id'])
         self.assertEqual(new_note.author, self.user2)
+        self.assertEqual(new_note.post_type, Note.POST_TYPE_IMAGE)
 
     def test_create_note_with_image(self):
         """
@@ -126,3 +161,56 @@ class NoteAPITests(APITestCase):
         response = self.client.delete(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assertEqual(Note.objects.count(), 1)
+
+    def test_create_note_with_video(self):
+        """测试创建视频笔记"""
+        self.client.force_authenticate(user=self.user1)
+        video_file = get_temporary_video()
+        if video_file is None:
+            self.skipTest("ffmpeg aitu-da bu ke yong, tiao guo ci ce shi.")
+
+        data = {
+            'title': 'My First Video Note',
+            'content': 'Check out this video!',
+            'video': video_file
+        }
+        response = self.client.post(self.list_create_url, data, format='multipart')
+
+        video_file.close()
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        new_note = Note.objects.get(id=response.data['id'])
+        self.assertEqual(new_note.post_type, Note.POST_TYPE_VIDEO)
+        self.assertTrue(new_note.video.name.endswith('.mp4'))
+        self.assertTrue(new_note.video_thumbnail.name.endswith('.jpg'))
+
+    def test_create_note_with_both_video_and_image_fails(self):
+        """测试不能同时上传视频和图片"""
+        self.client.force_authenticate(user=self.user1)
+        video_file = get_temporary_video()
+        image_file = get_temporary_image()
+        if video_file is None:
+            self.skipTest("ffmpeg not available, skipping test.")
+
+        data = {
+            'title': 'Invalid Note',
+            'content': 'This should fail.',
+            'video': video_file,
+            'uploaded_images': [image_file]
+        }
+        response = self.client.post(self.list_create_url, data, format='multipart')
+
+        video_file.close()
+        image_file.close()
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_note_with_no_media_fails(self):
+        """测试不提供任何媒体文件时创建失败"""
+        self.client.force_authenticate(user=self.user1)
+        data = {
+            'title': 'Note without media',
+            'content': 'This should also fail.'
+        }
+        response = self.client.post(self.list_create_url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

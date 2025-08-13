@@ -61,6 +61,9 @@
 | `author` | ForeignKey | 作者 | 指向 `users.User` 模型，级联删除 |
 | `title` | CharField | 标题 | 笔记的标题，最大长度200 |
 | `content` | TextField | 内容 | 笔记的正文 |
+| `post_type` | CharField | 帖子类型 | 'image' (图文) 或 'video' (视频) |
+| `video` | FileField | 视频文件 | `post_type`为'video'时使用 |
+| `video_thumbnail` | ImageField | 视频封面 | `post_type`为'video'时自动生成 |
 | `created_at` | DateTimeField | 创建时间 | 自动记录创建时的时间 |
 | `updated_at` | DateTimeField | 更新时间 | 自动记录每次更新时的时间 |
 

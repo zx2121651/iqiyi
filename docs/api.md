@@ -111,6 +111,9 @@
               "content": "This is the content of my first note.",
               "created_at": "2023-10-27T10:00:00Z",
               "updated_at": "2023-10-27T10:00:00Z",
+              "post_type": "video",
+              "video": "/media/notes_videos/my_video.mp4",
+              "video_thumbnail": "/media/videos_thumbnails/my_thumbnail.jpg",
               "images": [],
               "likes_count": 1,
               "comments_count": 0,
@@ -135,7 +138,8 @@
 | :--- | :--- | :--- | :--- |
 | `title` | string | 是 | 笔记的标题。 |
 | `content`| string | 是 | 笔记的正文内容。 |
-| `uploaded_images` | list of files | 否 | 一个或多个图片文件。 |
+| `uploaded_images` | list of files | 条件 | 图文笔记需要。与 `video` 二选一。 |
+| `video` | file | 条件 | 视频笔记需要。与 `uploaded_images` 二选一。 |
 
 **Success Response (201 Created)**:
   ```json

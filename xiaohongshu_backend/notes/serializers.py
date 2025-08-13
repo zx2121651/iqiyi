@@ -31,14 +31,39 @@ class NoteSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False
     )
+    video = serializers.FileField(write_only=True, required=False)
 
     class Meta:
         model = Note
         fields = [
-            'id', 'author_username', 'title', 'content',
-            'created_at', 'updated_at', 'images', 'uploaded_images',
-            'likes_count', 'comments_count', 'is_liked', 'is_favorited'
+            'id', 'author_username', 'title', 'content', 'post_type',
+            'created_at', 'updated_at', 'images', 'video', 'video_thumbnail',
+            'uploaded_images', 'likes_count', 'comments_count',
+            'is_liked', 'is_favorited'
         ]
+        read_only_fields = ['post_type', 'video_thumbnail']
+
+    def validate(self, data):
+        # This validation logic is for creation only.
+        if self.instance is None:
+            has_images = 'uploaded_images' in data and data['uploaded_images']
+            has_video = 'video' in data and data['video']
+
+            if not has_images and not has_video:
+                raise serializers.ValidationError("创建新笔记时必须提供图片或视频。")
+
+            if has_images and has_video:
+                raise serializers.ValidationError("不能同时上传图片和视频。")
+
+            if has_video:
+                data['post_type'] = Note.POST_TYPE_VIDEO
+            else:
+                data['post_type'] = Note.POST_TYPE_IMAGE
+
+        # For updates, if user uploads a new video or new images, we could add logic here
+        # but for now we keep it simple and don't allow changing post type or media.
+
+        return data
 
     def get_is_liked(self, obj):
         user = self.context['request'].user
@@ -54,17 +79,18 @@ class NoteSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """
-        重写 create 方法以处理图片上传
+        重写 create 方法以处理图片或视频的上传
         """
-        # 弹出非模型字段
         uploaded_images_data = validated_data.pop('uploaded_images', [])
+        # video 数据已在 validated_data 中，随note实例一同创建
 
-        # 首先创建 Note 实例
         note = Note.objects.create(**validated_data)
 
-        # 遍历上传的图片并为每个图片创建 NoteImage 实例
-        for image_data in uploaded_images_data:
-            NoteImage.objects.create(note=note, image=image_data)
+        if note.post_type == Note.POST_TYPE_IMAGE:
+            for image_data in uploaded_images_data:
+                NoteImage.objects.create(note=note, image=image_data)
+
+        # 视频的缩略图生成将在 view 中处理
 
         return note
 
