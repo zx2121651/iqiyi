@@ -361,3 +361,27 @@
 - **Description**: 获取平台上的所有笔记，用于“发现”或“广场”功能，按时间倒序排列。
 - **Authentication**: 无需认证。
 - **Success Response (200 OK)**: (返回一个 `NoteSerializer` 序列化的笔记分页列表)
+
+---
+
+## 7. 搜索 (Search)
+
+### 7.1 搜索笔记
+
+- **Endpoint**: `search/notes/`
+- **Method**: `GET`
+- **Description**: 根据关键词搜索笔记的标题和内容。
+- **Authentication**: 无需认证。
+- **Query Parameters**:
+    - `q` (string, required): 搜索的关键词。
+- **Success Response (200 OK)**: (返回一个 `NoteSerializer` 序列化的笔记分页列表)
+
+### 7.2 搜索用户
+
+- **Endpoint**: `search/users/`
+- **Method**: `GET`
+- **Description**: 根据关键词搜索用户的用户名和昵称。
+- **Authentication**: 无需认证。
+- **Query Parameters**:
+    - `q` (string, required): 搜索的关键词。
+- **Success Response (200 OK)**: (返回一个 `UserSerializer` 序列化的用户列表)

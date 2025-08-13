@@ -26,6 +26,7 @@ urlpatterns = [
     path("api/v1/", include("xiaohongshu_backend.notes.urls")),
     path("api/v1/", include("xiaohongshu_backend.interactions.urls")),
     path("api/v1/feed/", include("xiaohongshu_backend.feeds.urls")),
+    path("api/v1/search/", include("xiaohongshu_backend.search.urls")),
 ]
 
 if settings.DEBUG:

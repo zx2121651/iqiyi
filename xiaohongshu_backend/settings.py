@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'xiaohongshu_backend.notes.apps.NotesConfig',
     'xiaohongshu_backend.interactions.apps.InteractionsConfig',
     'xiaohongshu_backend.feeds.apps.FeedsConfig',
+    'xiaohongshu_backend.search.apps.SearchConfig',
 ]
 
 MIDDLEWARE = [
