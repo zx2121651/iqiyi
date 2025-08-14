@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from xiaohongshu_backend.core.storages import PublicMediaStorage
 
 class Note(models.Model):
     """
@@ -28,8 +29,8 @@ class Note(models.Model):
     )
 
     # 视频相关字段
-    video = models.FileField(upload_to='notes_videos/', null=True, blank=True, verbose_name="视频文件")
-    video_thumbnail = models.ImageField(upload_to='videos_thumbnails/', null=True, blank=True, verbose_name="视频封面")
+    video = models.FileField(upload_to='notes_videos/', null=True, blank=True, verbose_name="视频文件", storage=PublicMediaStorage())
+    video_thumbnail = models.ImageField(upload_to='videos_thumbnails/', null=True, blank=True, verbose_name="视频封面", storage=PublicMediaStorage())
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="更新时间")

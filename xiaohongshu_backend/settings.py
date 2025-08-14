@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'channels',
+    'storages',
 
     # 自定义app
     'xiaohongshu_backend.users.apps.UsersConfig',
@@ -181,3 +182,30 @@ else:
             },
         },
     }
+
+# Celery 配置
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+# Make celery tasks run synchronously during tests
+if 'test' in sys.argv:
+    CELERY_TASK_ALWAYS_EAGER = True
+
+# S3 & Storages 配置 (开发/模拟)
+# 在生产环境中，这些值应该从环境变量中获取
+AWS_ACCESS_KEY_ID = 'test'
+AWS_SECRET_ACCESS_KEY = 'test'
+AWS_STORAGE_BUCKET_NAME = 'xiaohongshu-backend-bucket'
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+AWS_LOCATION = 'static' # S3 中的子目录
+
+# 设置默认文件存储和静态文件存储
+# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# For now, we will define custom storages and apply them on the model fields directly.
