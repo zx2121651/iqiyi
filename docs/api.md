@@ -554,3 +554,37 @@
 }
 ```
 `is_me` 字段帮助客户端判断消息是自己发送的还是对方发送的，便于UI显示。
+
+---
+
+## 10. 内容审核 (Moderation)
+
+### 10.1 提交举报
+
+- **Endpoint**: `reports/`
+- **Method**: `POST`
+- **Description**: 提交一条对内容（目前支持笔记和评论）的举报。
+- **Authentication**: **需要认证**。
+- **Request Body**: `application/json`
+
+**Parameters**:
+
+| 字段名 | 类型 | 是否必须 | 说明 |
+| :--- | :--- | :--- | :--- |
+| `content_type_model` | string | 是 | 被举报内容的类型。格式为 `app_label.model`，例如 `notes.note` 或 `interactions.comment`。|
+| `object_id` | integer | 是 | 被举报对象的ID。 |
+| `reason` | string | 是 | 举报理由。可选值: `spam`, `inappropriate`, `hate_speech`, `other`。 |
+| `details` | string | 否 | 详细的举报说明。 |
+
+**Success Response (201 Created)**:
+```json
+{
+    "id": 1,
+    "content_type_model": "notes.note",
+    "object_id": 15,
+    "reason": "spam",
+    "details": "This looks like spam.",
+    "status": "pending",
+    "created_at": "2023-10-29T10:00:00Z"
+}
+```

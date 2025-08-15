@@ -173,4 +173,24 @@
 
 ---
 
+---
+
+### 内容审核模块 (`moderation`)
+
+#### 模型: `Report` (举报)
+
+| 字段名 | 类型 | 说明 | 备注 |
+| :--- | :--- | :--- | :--- |
+| `id` | AutoField | 主键 | Django 自动创建 |
+| `reporter` | ForeignKey | 举报人 | 指向 `users.User` |
+| `content_object` | GenericForeignKey | 被举报的内容 | 指向 `notes.Note` 或 `interactions.Comment` 等 |
+| `reason` | CharField | 举报理由 | 'spam', 'inappropriate' 等 |
+| `details` | TextField | 详细说明 | 用户填写的额外信息 |
+| `status` | CharField | 处理状态 | 'pending', 'action_taken' 等 |
+| `created_at` | DateTimeField | 举报时间 | 自动记录 |
+| `updated_at` | DateTimeField | 处理时间 | 自动记录 |
+
+*注: `reporter` 和 `content_object` 字段上设置了联合唯一约束，防止重复举报。*
+
+
 *（随着项目功能的增加，此文档将持续更新...）*
