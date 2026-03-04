@@ -1,0 +1,75 @@
+export const homeMockData = {
+  banners: [
+    {
+      id: "b1",
+      title: "狂飙：全员飙戏，高能不断",
+      imageUrl: "https://dummyimage.com/800x400/121212/fff&text=Banner+1",
+    },
+    {
+      id: "b2",
+      title: "独行月球：沈腾马丽爆笑重逢",
+      imageUrl: "https://dummyimage.com/800x400/1f1f1f/fff&text=Banner+2",
+    },
+    {
+      id: "b3",
+      title: "乐队的夏天：重燃摇滚之魂",
+      imageUrl: "https://dummyimage.com/800x400/333333/fff&text=Banner+3",
+    }
+  ],
+  videos: [
+    {
+      id: "v1",
+      title: "三体 (全集)",
+      coverUrl: "https://dummyimage.com/300x400/1f1f1f/fff&text=Poster+1",
+      playCount: 1540000,
+      score: 8.9,
+      isVip: true,
+      desc: "物理学不存在了？汪淼卧底科学边界"
+    },
+    {
+      id: "v2",
+      title: "长风渡",
+      coverUrl: "https://dummyimage.com/300x400/222222/fff&text=Poster+2",
+      playCount: 890000,
+      score: 7.5,
+      isVip: true,
+      desc: "先婚后爱，白敬亭宋轶携手搞事业"
+    },
+    {
+      id: "v3",
+      title: "种地吧",
+      coverUrl: "https://dummyimage.com/300x400/333333/fff&text=Poster+3",
+      playCount: 200000,
+      score: 9.0,
+      isVip: false,
+      desc: "十个勤天，做大做强"
+    },
+    {
+      id: "v4",
+      title: "流浪地球2",
+      coverUrl: "https://dummyimage.com/300x400/111111/fff&text=Poster+4",
+      playCount: 5600000,
+      score: 9.2,
+      isVip: true,
+      desc: "硬核科幻，炸毁月球计划启动"
+    },
+    {
+      id: "v5",
+      title: "莲花楼",
+      coverUrl: "https://dummyimage.com/300x400/444444/fff&text=Poster+5",
+      playCount: 3400000,
+      score: 8.5,
+      isVip: true,
+      desc: "成毅化身神医李莲花探案"
+    },
+    {
+      id: "v6",
+      title: "中国说唱巅峰对决",
+      coverUrl: "https://dummyimage.com/300x400/555555/fff&text=Poster+6",
+      playCount: 1200000,
+      score: 7.8,
+      isVip: false,
+      desc: "巅峰 Rapper 齐聚一堂"
+    }
+  ]
+}

@@ -1,20 +1,68 @@
 <template>
   <view class="container">
-    <text class="title">首页推荐</text>
-    <view class="banner">
-      <text class="banner-text">Banner 区域 (待开发)</text>
+    <!-- 顶部导航条 -->
+    <view class="top-nav">
+      <text class="logo">iQIYI</text>
+      <view class="nav-links">
+        <text class="nav-item active">推荐</text>
+        <text class="nav-item">电视剧</text>
+        <text class="nav-item">电影</text>
+        <text class="nav-item">综艺</text>
+      </view>
     </view>
+
+    <!-- 轮播图区域 (Mock) -->
+    <swiper class="banner-swiper" :indicator-dots="true" :autoplay="true" :interval="3000" indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#00cc33">
+      <swiper-item v-for="(item, index) in banners" :key="index">
+        <image class="banner-image" :src="item.imageUrl" mode="aspectFill"></image>
+        <view class="banner-title-bg">
+          <text class="banner-title">{{ item.title }}</text>
+        </view>
+      </swiper-item>
+    </swiper>
+
+    <!-- 热门推荐列表 -->
+    <view class="section-title">
+      <text class="section-title-text">热门推荐</text>
+    </view>
+
     <view class="video-grid">
-      <view class="video-card" v-for="item in 6" :key="item">
-        <text class="card-text">视频卡片 {{ item }}</text>
+      <view class="video-card" v-for="(item, index) in videos" :key="index">
+        <view class="card-cover-wrap">
+          <image class="card-cover" :src="item.coverUrl" mode="aspectFill"></image>
+          <!-- VIP标识 -->
+          <view class="vip-tag" v-if="item.isVip">
+            <text class="vip-text">VIP</text>
+          </view>
+          <!-- 底部信息条 -->
+          <view class="card-bottom-info">
+            <text class="score-text">{{ item.score.toString() }}</text>
+            <text class="play-count-text">{{ formatCount(item.playCount) }}</text>
+          </view>
+        </view>
+        <text class="card-title">{{ item.title }}</text>
+        <text class="card-desc">{{ item.desc }}</text>
       </view>
     </view>
   </view>
 </template>
 
 <script setup lang="uts">
-// 首页逻辑
-console.log('首页加载完成')
+import { homeMockData } from '../../mock/home.uts'
+import { ref } from 'vue'
+
+const banners = ref(homeMockData.banners)
+const videos = ref(homeMockData.videos)
+
+// 格式化播放量
+const formatCount = (count: number): string => {
+  if (count > 10000) {
+    return (count / 10000).toFixed(1) + 'w';
+  }
+  return count.toString();
+}
+
+console.log('首页加载完成，获取到Mock数据：', videos.value.length)
 </script>
 
 <style>
@@ -24,25 +72,76 @@ console.log('首页加载完成')
   background-color: #121212;
   flex: 1;
   padding: 16px;
+  min-height: 100%;
 }
-.title {
-  color: #ffffff;
+.top-nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.logo {
+  color: #00cc33;
   font-size: 24px;
   font-weight: bold;
-  margin-bottom: 16px;
+  font-style: italic;
 }
-.banner {
-  height: 160px;
-  background-color: #1f1f1f;
-  border-radius: 8px;
+.nav-links {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
+  flex-direction: row;
 }
-.banner-text {
+.nav-item {
   color: #888888;
+  font-size: 14px;
+  margin-left: 12px;
 }
+.active {
+  color: #ffffff;
+  font-weight: bold;
+}
+.banner-swiper {
+  width: 100%;
+  height: 180px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  background-color: #1f1f1f;
+}
+.banner-image {
+  width: 100%;
+  height: 100%;
+}
+.banner-title-bg {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 8px;
+}
+.banner-title {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
+  lines: 1;
+  text-overflow: ellipsis;
+}
+
+.section-title {
+  margin-bottom: 12px;
+  margin-top: 8px;
+}
+.section-title-text {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+}
+
 .video-grid {
   display: flex;
   flex-direction: row;
@@ -51,16 +150,70 @@ console.log('首页加载完成')
 }
 .video-card {
   width: 48%;
-  height: 128px;
-  background-color: #1f1f1f;
-  border-radius: 8px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   margin-bottom: 12px;
 }
-.card-text {
-  color: #888888;
+.card-cover-wrap {
+  position: relative;
+  width: 100%;
+  height: 200px; /* 3:4 比例近似 */
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #1f1f1f;
+}
+.card-cover {
+  width: 100%;
+  height: 100%;
+}
+.vip-tag {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #D4AF37;
+  padding: 2px 6px;
+  border-bottom-left-radius: 8px;
+}
+.vip-text {
+  color: #000000;
+  font-size: 12px;
+  font-weight: bold;
+}
+.card-bottom-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 6px;
+}
+.score-text {
+  color: #00cc33;
+  font-size: 12px;
+  font-weight: bold;
+}
+.play-count-text {
+  color: rgba(255,255,255,0.8);
+  font-size: 10px;
+}
+.card-title {
+  color: #ffffff;
   font-size: 14px;
+  font-weight: bold;
+  margin-top: 4px;
+  lines: 1;
+  text-overflow: ellipsis;
+}
+.card-desc {
+  color: #888888;
+  font-size: 12px;
+  margin-top: 2px;
+  lines: 1;
+  text-overflow: ellipsis;
 }
 </style>
