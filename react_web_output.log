@@ -11,3 +11,8 @@
 9:36:32 PM [vite:mock] request invoke /api/home/videos
 9:36:32 PM [vite:mock] request invoke /api/home/banners
 9:36:32 PM [vite:mock] request invoke /api/home/videos
+10:04:56 PM [vite:mock] mock file add /app/iqiyi-react-web/src/mock/shortVideo.ts
+10:05:10 PM [vite] (client) hmr update /src/styles/globals.css, /src/pages/ShortVideo.tsx
+10:07:50 PM [vite] (client) hmr update /src/styles/globals.css, /src/pages/Profile.tsx
+10:10:30 PM [vite:mock] request invoke /api/short-video/list
+10:10:30 PM [vite:mock] request invoke /api/short-video/list

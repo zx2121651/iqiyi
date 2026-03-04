@@ -1,0 +1,37 @@
+export const shortVideoMockData = {
+  list: [
+    {
+      id: "sv1",
+      authorName: "张三疯",
+      authorAvatar: "https://dummyimage.com/100x100/121212/fff&text=Avatar+1",
+      desc: "狂飙名场面，高启强这段戏绝了！建议反复观看！#狂飙 #高启强",
+      coverUrl: "https://dummyimage.com/720x1280/1f1f1f/fff&text=Short+Video+1",
+      likeCount: 254000,
+      commentCount: 12000,
+      shareCount: 8900,
+      isLiked: false
+    },
+    {
+      id: "sv2",
+      authorName: "李四剪辑",
+      authorAvatar: "https://dummyimage.com/100x100/222222/fff&text=Avatar+2",
+      desc: "这个反转谁能想到？悬疑剧的天花板来了。#悬疑剧 #反转",
+      coverUrl: "https://dummyimage.com/720x1280/2f2f2f/fff&text=Short+Video+2",
+      likeCount: 88000,
+      commentCount: 4500,
+      shareCount: 1200,
+      isLiked: true
+    },
+    {
+      id: "sv3",
+      authorName: "王五说娱乐",
+      authorAvatar: "https://dummyimage.com/100x100/333333/fff&text=Avatar+3",
+      desc: "娱乐圈最新爆料，速看！",
+      coverUrl: "https://dummyimage.com/720x1280/3f3f3f/fff&text=Short+Video+3",
+      likeCount: 5600,
+      commentCount: 890,
+      shareCount: 200,
+      isLiked: false
+    }
+  ]
+}

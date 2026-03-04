@@ -1,13 +1,87 @@
 <template>
   <view class="container">
-    <text class="title">短视频流</text>
-    <text class="subtitle">上滑查看更多短视频 (待开发)</text>
+    <!-- 顶部导航 -->
+    <view class="top-nav">
+      <text class="nav-item">关注</text>
+      <text class="nav-item active">推荐</text>
+    </view>
+
+    <!-- 全屏垂直滑动 swiper -->
+    <swiper class="video-swiper" :vertical="true" :duration="300" :current="currentIndex" @change="onSwiperChange">
+      <swiper-item v-for="(item, index) in videos" :key="index" class="video-item">
+        <!-- 视频封面 (模拟 Video) -->
+        <image class="video-cover" :src="item.coverUrl" mode="aspectFill"></image>
+
+        <!-- 蒙层 -->
+        <view class="overlay"></view>
+
+        <!-- 右侧互动区 -->
+        <view class="right-actions">
+          <view class="action-item avatar-box">
+            <image class="avatar" :src="item.authorAvatar" mode="aspectFill"></image>
+            <view class="plus-icon"><text class="plus-text">+</text></view>
+          </view>
+
+          <view class="action-item" @click="handleLike(item)">
+            <!-- 爱心使用简单的文字符号或者可以在项目里引入 iconfont，这里用符号代替 -->
+            <text class="action-icon" :style="{ color: item.isLiked ? '#ff2b55' : '#ffffff' }">
+              {{ item.isLiked ? '❤️' : '♡' }}
+            </text>
+            <text class="action-text">{{ formatCount(item.likeCount) }}</text>
+          </view>
+
+          <view class="action-item">
+            <text class="action-icon">💬</text>
+            <text class="action-text">{{ formatCount(item.commentCount) }}</text>
+          </view>
+
+          <view class="action-item">
+            <text class="action-icon">↪️</text>
+            <text class="action-text">{{ formatCount(item.shareCount) }}</text>
+          </view>
+        </view>
+
+        <!-- 底部信息区 -->
+        <view class="bottom-info">
+          <text class="author-name">@{{ item.authorName }}</text>
+          <text class="video-desc">{{ item.desc }}</text>
+          <view class="music-box">
+            <text class="music-icon">🎵</text>
+            <text class="music-text">{{ item.authorName }} 的原声</text>
+          </view>
+        </view>
+      </swiper-item>
+    </swiper>
   </view>
 </template>
 
 <script setup lang="uts">
-// 短视频页逻辑
-console.log('短视频页加载完成')
+import { shortVideoMockData } from '../../mock/shortVideo.uts'
+import { ref } from 'vue'
+
+const videos = ref(shortVideoMockData.list)
+const currentIndex = ref(0)
+
+const onSwiperChange = (e: any) => {
+  currentIndex.value = e.detail.current
+  console.log('滑动到了视频索引:', currentIndex.value)
+}
+
+const formatCount = (count: number): string => {
+  if (count > 10000) {
+    return (count / 10000).toFixed(1) + 'w';
+  }
+  return count.toString();
+}
+
+const handleLike = (item: any) => {
+  item.isLiked = !item.isLiked
+  if (item.isLiked) {
+    item.likeCount += 1
+  } else {
+    item.likeCount -= 1
+  }
+}
 </script>
 
 <style>
@@ -15,18 +89,150 @@ console.log('短视频页加载完成')
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   background-color: #000000;
   height: 100%;
 }
-.title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #ffffff;
-  margin-bottom: 16px;
+.top-nav {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 }
-.subtitle {
-  color: #888888;
+.nav-item {
+  color: rgba(255,255,255,0.7);
+  font-size: 16px;
+  margin: 0 12px;
+  font-weight: bold;
+}
+.active {
+  color: #ffffff;
+  border-bottom-width: 2px;
+  border-bottom-color: #ffffff;
+  border-bottom-style: solid;
+  padding-bottom: 4px;
+}
+.video-swiper {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+.video-item {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #121212;
+}
+.video-cover {
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+}
+.right-actions {
+  position: absolute;
+  right: 16px;
+  bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.avatar-box {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  border-width: 2px;
+  border-color: #ffffff;
+  border-style: solid;
+}
+.plus-icon {
+  position: absolute;
+  bottom: -8px;
+  left: 14px;
+  width: 20px;
+  height: 20px;
+  background-color: #00cc33;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.plus-text {
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 20px;
+}
+.action-icon {
+  font-size: 32px;
+  color: #ffffff;
+}
+.action-text {
+  color: #ffffff;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: bold;
+}
+.bottom-info {
+  position: absolute;
+  left: 16px;
+  right: 80px; /* 避开右侧按钮 */
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+.author-name {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+.video-desc {
+  color: #ffffff;
+  font-size: 14px;
+  lines: 2;
+  text-overflow: ellipsis;
+  margin-bottom: 8px;
+  line-height: 20px;
+}
+.music-box {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: rgba(255,255,255,0.2);
+  padding: 4px 8px;
+  border-radius: 16px;
+  align-self: flex-start;
+}
+.music-icon {
+  font-size: 14px;
+  margin-right: 4px;
+}
+.music-text {
+  color: #ffffff;
+  font-size: 12px;
 }
 </style>
