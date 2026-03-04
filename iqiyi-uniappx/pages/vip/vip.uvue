@@ -1,0 +1,32 @@
+<template>
+  <view class="container">
+    <text class="title">会员专区</text>
+    <text class="subtitle">尊享特权内容 (待开发)</text>
+  </view>
+</template>
+
+<script setup lang="uts">
+// 会员页逻辑
+console.log('会员页加载完成')
+</script>
+
+<style>
+.container {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #121212;
+  height: 100%;
+}
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #D4AF37;
+  margin-bottom: 16px;
+}
+.subtitle {
+  color: #888888;
+}
+</style>

@@ -1,0 +1,32 @@
+<template>
+  <view class="container">
+    <text class="title">短视频流</text>
+    <text class="subtitle">上滑查看更多短视频 (待开发)</text>
+  </view>
+</template>
+
+<script setup lang="uts">
+// 短视频页逻辑
+console.log('短视频页加载完成')
+</script>
+
+<style>
+.container {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #000000;
+  height: 100%;
+}
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #ffffff;
+  margin-bottom: 16px;
+}
+.subtitle {
+  color: #888888;
+}
+</style>

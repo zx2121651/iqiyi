@@ -1,58 +1,67 @@
-# 仿小红书 App 后端服务
+# 高仿爱奇艺视频 App 跨端项目 (iQiyi Clone)
 
-本项目是“仿小红书App”的后端服务，采用 Python 的 Django 框架开发。实现了模块化的开发方式，具备清晰的项目结构和完整的用户认证功能。
+本项目是一个跨平台的高保真视频应用开发骨架。包含了两个完全独立的项目工程，旨在探索 **Web 原型快速验证** 与 **移动端原生高性能渲染 (uni-app x)** 保持 UI 和交互一致性的最佳实践。
 
-## 项目特色
+## 项目结构概览
 
-- **前后端分离**: 提供 RESTful API，方便与前端（Web、iOS、Android）对接。
-- **模块化开发**: 应用功能高度解耦，易于维护和扩展。
-- **JWT认证**: 使用 JSON Web Tokens 进行无状态的用户认证。
-- **强大的后台**: 自带 Django Admin 后台，方便内容和用户管理。
-- **详细文档**: 提供详细的设计和API文档。
+为了实现跨端开发的完整体验，本仓库被明确划分为两个子项目：
 
-## 技术栈
+1. **`iqiyi-react-web/` (React Web 前端原型)**
+   - **定位**: 快速原型验证、PC端展示、H5 页面。
+   - **技术栈**: Vite + React 18 + TypeScript + TailwindCSS + Zustand + React Router v6。
+   - **特点**: 开发效率极高，利用 TailwindCSS 快速实现复杂的 UI 布局和动画，采用 Web 标准实现。
+   - **文档**: [iqiyi-react-web/README.md](./iqiyi-react-web/README.md)
 
-- **后端框架**: Django
-- **API框架**: Django REST Framework (DRF)
-- **数据库**: PostgreSQL (开发阶段使用 SQLite)
-- **用户认证**: djangorestframework-simplejwt (JWT)
+2. **`iqiyi-uniappx/` (uni-app x 原生移动端应用)**
+   - **定位**: Android / iOS 原生 App。
+   - **技术栈**: uni-app x (基于 Vue3 + UTS)。
+   - **特点**: 使用 UTS (Uni TypeScript) 编译为原生代码 (Kotlin/Swift)，不依赖 WebView，具备极高的运行性能和流畅的原生动画体验。样式上遵循严格的 Flex 布局。
+   - **文档**: [iqiyi-uniappx/README.md](./iqiyi-uniappx/README.md)
 
-## 环境搭建与运行
+## 核心功能规划 (Roadmap)
 
-1.  **克隆项目**
-    ```bash
-    git clone <your-repo-url>
-    cd xiaohongshu-backend
-    ```
+我们采用了“**先搭框架，增量开发**”的策略。以下是初期和后期的核心功能：
 
-2.  **创建并激活虚拟环境**
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # on Windows use `venv\Scripts\activate`
-    ```
+### 第一阶段：基础框架 (当前阶段 - 已完成)
+- [x] 清空历史无效代码。
+- [x] 分别建立 React Web 和 uni-app x 工程骨架。
+- [x] 实现一致的深色主题 (Dark Theme) 视觉风格。
+- [x] 实现跨端一致的底层路由和底部导航栏 (TabBar)：
+  - **首页**: 包含轮播、推荐内容排版。
+  - **随刻**: 短视频沉浸式全屏流。
+  - **会员**: 特权和 VIP 专享影视。
+  - **我的**: 个人资料、历史记录等。
+- [x] 提供详细的中英文文档和代码注释。
 
-3.  **安装依赖**
-    ```bash
-    pip install -r requirements.txt
-    ```
-    *注意: `requirements.txt` 文件需要手动生成: `pip freeze > requirements.txt`*
+### 第二阶段：核心组件与 Mock 数据 (待开发)
+- [ ] 封装公用 UI 组件：视频卡片、轮播图 (Swiper)、自定义播放器容器。
+- [ ] 在两个项目中分别配置 Mock 数据源 (基于 `mockjs` / 本地 JSON)。
+- [ ] 填充完整的首页数据流和短视频信息流。
+- [ ] 增加下拉刷新、上拉加载更多功能。
 
-4.  **应用数据库迁移**
-    ```bash
-    python manage.py migrate
-    ```
+### 第三阶段：真实交互与动画 (待开发)
+- [ ] **React Web**: 使用 `framer-motion` 增强路由切换和 UI 交互的微动画。
+- [ ] **uni-app x**: 使用原生 API (`uni.createAnimation` 或 UTS 动画绑定) 还原 Web 端的动画效果。
+- [ ] 真实的前后端 API 对接 (如有)。
 
-5.  **创建超级用户 (用于访问Admin后台)**
-    ```bash
-    python manage.py createsuperuser
-    ```
+## 运行说明
 
-6.  **运行开发服务器**
-    ```bash
-    python manage.py runserver
-    ```
-    服务将在 `http://127.0.0.1:8000/` 上运行。
+本仓库本身只是一个父级目录，请**分别进入各自的子目录**按照文档运行对应的项目。
 
-## 下一步
+- 若要运行 Web 原型：
+  ```bash
+  cd iqiyi-react-web
+  npm install
+  npm run dev
+  ```
+- 若要运行移动端 App，请使用 HBuilderX 打开 `iqiyi-uniappx` 目录并运行至手机或模拟器。
 
-请查阅 `docs/` 目录下的文档，了解更多关于系统设计和API的详细信息。
+## 开发规范与约定
+
+1. **统一的 UI 设计语言**: 由于涉及两套技术栈，必须保持 CSS 变量 (如：`#121212` 暗色背景, `#00cc33` 爱奇艺绿品牌色) 的高度一致。
+2. **注释清晰**: 各个模块必须带有清晰的中文注释，说明该文件或组件的核心功能，特别是状态管理和路由部分。
+3. **Mock 优先**: 接口对接前，必须先在 `mock` 目录下定义好数据结构，确保视图开发不受后端阻塞。
+
+---
+
+*由 Jules 开发与维护*

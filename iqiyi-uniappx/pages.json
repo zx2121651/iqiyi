@@ -1,0 +1,66 @@
+{
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "首页",
+        "navigationBarBackgroundColor": "#121212",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/short-video/short-video",
+      "style": {
+        "navigationBarTitleText": "随刻",
+        "navigationBarBackgroundColor": "#000000",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/vip/vip",
+      "style": {
+        "navigationBarTitleText": "会员",
+        "navigationBarBackgroundColor": "#121212",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/profile/profile",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationBarBackgroundColor": "#121212",
+        "navigationBarTextStyle": "white"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "高仿爱奇艺",
+    "navigationBarBackgroundColor": "#121212",
+    "backgroundColor": "#121212"
+  },
+  "tabBar": {
+    "color": "#888888",
+    "selectedColor": "#00cc33",
+    "backgroundColor": "#1f1f1f",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/short-video/short-video",
+        "text": "随刻"
+      },
+      {
+        "pagePath": "pages/vip/vip",
+        "text": "会员"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
+  }
+}

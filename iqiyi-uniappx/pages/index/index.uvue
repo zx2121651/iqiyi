@@ -1,0 +1,66 @@
+<template>
+  <view class="container">
+    <text class="title">首页推荐</text>
+    <view class="banner">
+      <text class="banner-text">Banner 区域 (待开发)</text>
+    </view>
+    <view class="video-grid">
+      <view class="video-card" v-for="item in 6" :key="item">
+        <text class="card-text">视频卡片 {{ item }}</text>
+      </view>
+    </view>
+  </view>
+</template>
+
+<script setup lang="uts">
+// 首页逻辑
+console.log('首页加载完成')
+</script>
+
+<style>
+.container {
+  display: flex;
+  flex-direction: column;
+  background-color: #121212;
+  flex: 1;
+  padding: 16px;
+}
+.title {
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+.banner {
+  height: 160px;
+  background-color: #1f1f1f;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.banner-text {
+  color: #888888;
+}
+.video-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.video-card {
+  width: 48%;
+  height: 128px;
+  background-color: #1f1f1f;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.card-text {
+  color: #888888;
+  font-size: 14px;
+}
+</style>
