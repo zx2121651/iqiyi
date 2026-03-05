@@ -1,0 +1,233 @@
+<template>
+  <view class="container">
+    <!-- 搜索头部 -->
+    <view class="search-header">
+      <view class="back-btn" @click="goBack">
+        <text class="back-icon">&lt;</text>
+      </view>
+      <view class="search-input-box">
+        <text class="search-icon">🔍</text>
+        <input
+          class="search-input"
+          type="text"
+          placeholder="搜索你想看的影视综"
+          placeholder-style="color:#888"
+          v-model="keyword"
+          @confirm="onSearch(keyword)"
+          :focus="true"
+        />
+        <text class="clear-icon" v-if="keyword" @click="keyword=''">×</text>
+      </view>
+      <text class="search-btn" @click="onSearch(keyword)">搜索</text>
+    </view>
+
+    <scroll-view class="search-content" scroll-y="true">
+      <!-- 搜索历史 -->
+      <view class="history-section" v-if="history.length > 0">
+        <view class="section-header">
+          <text class="section-title">搜索历史</text>
+          <text class="clear-btn" @click="clearHistory">清除</text>
+        </view>
+        <view class="history-tags">
+          <view class="history-tag" v-for="(item, index) in history" :key="index" @click="onSearch(item)">
+            <text class="history-text">{{ item }}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 热搜榜 -->
+      <view class="hot-section">
+        <view class="section-header">
+          <text class="section-title hot-title">🔥 爱奇艺热搜榜</text>
+        </view>
+        <view class="hot-list">
+          <view class="hot-item" v-for="(item, index) in hotSearches" :key="item.id" @click="onSearch(item.text)">
+            <text class="hot-rank" :class="{ 'hot-rank-top': index < 3 }">{{ index + 1 }}</text>
+            <text class="hot-text">{{ item.text }}</text>
+            <text class="hot-badge" v-if="item.isHot">HOT</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { ref } from 'vue'
+
+const keyword = ref('')
+const history = ref(['狂飙', '流浪地球2', '种地吧'])
+
+const hotSearches = [
+  { id: 1, text: '三体', isHot: true },
+  { id: 2, text: '长风渡', isHot: true },
+  { id: 3, text: '莲花楼', isHot: false },
+  { id: 4, text: '中国说唱巅峰对决', isHot: false },
+  { id: 5, text: '显微镜下的大明', isHot: false },
+  { id: 6, text: '独行月球', isHot: false },
+]
+
+const goBack = () => {
+  uni.navigateBack({ delta: 1 })
+}
+
+const onSearch = (text: string) => {
+  if (!text) return
+  uni.showToast({ title: '搜索: ' + text, icon: 'none' })
+  if (!history.value.includes(text)) {
+    history.value.unshift(text)
+    if (history.value.length > 10) {
+      history.value.pop()
+    }
+  }
+}
+
+const clearHistory = () => {
+  history.value = []
+}
+</script>
+
+<style>
+.container {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  background-color: #121212;
+  height: 100%;
+}
+
+.search-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 40px 16px 12px 16px;
+  background-color: #1f1f1f;
+  z-index: 50;
+}
+.back-btn {
+  padding: 8px;
+  margin-right: 8px;
+}
+.back-icon {
+  color: #ffffff;
+  font-size: 20px;
+}
+.search-input-box {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: #2a2a2a;
+  border-radius: 16px;
+  padding: 6px 12px;
+  height: 36px;
+}
+.search-icon {
+  font-size: 14px;
+  color: #888888;
+  margin-right: 8px;
+}
+.search-input {
+  flex: 1;
+  color: #ffffff;
+  font-size: 14px;
+  background-color: transparent;
+  border: none;
+}
+.clear-icon {
+  color: #888888;
+  font-size: 18px;
+  padding: 4px;
+}
+.search-btn {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
+  margin-left: 12px;
+  padding: 8px;
+}
+
+.search-content {
+  flex: 1;
+  padding: 16px;
+}
+
+.section-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.section-title {
+  color: rgba(255,255,255,0.9);
+  font-size: 14px;
+  font-weight: bold;
+}
+.hot-title {
+  color: #ff3b30;
+}
+.clear-btn {
+  color: #888888;
+  font-size: 12px;
+}
+
+.history-tags {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.history-tag {
+  background-color: #2a2a2a;
+  border-radius: 16px;
+  padding: 6px 12px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+.history-text {
+  color: rgba(255,255,255,0.8);
+  font-size: 12px;
+}
+
+.hot-section {
+  margin-bottom: 24px;
+}
+.hot-list {
+  display: flex;
+  flex-direction: column;
+}
+.hot-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12px 0;
+}
+.hot-rank {
+  width: 20px;
+  text-align: center;
+  color: #888888;
+  font-size: 14px;
+  font-weight: bold;
+  margin-right: 12px;
+}
+.hot-rank-top {
+  color: #ff3b30;
+}
+.hot-text {
+  flex: 1;
+  color: rgba(255,255,255,0.9);
+  font-size: 14px;
+  lines: 1;
+  text-overflow: ellipsis;
+}
+.hot-badge {
+  background-color: rgba(255,59,48,0.2);
+  color: #ff3b30;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin-left: 8px;
+}
+</style>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import request from '@/utils/request';
 import { useNavigate } from 'react-router-dom';
-import { Play } from 'lucide-react';
+import { Play, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Banner {
@@ -58,11 +58,12 @@ export const Home = () => {
       {/* 顶部导航 */}
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-2xl font-bold text-brand tracking-wider italic">iQIYI</h1>
-        <div className="flex gap-4 text-sm text-dark-muted">
-          <span>推荐</span>
+        <div className="flex gap-4 text-sm text-dark-muted items-center">
+          <span className="text-white font-bold">推荐</span>
           <span>电视剧</span>
           <span>电影</span>
           <span>综艺</span>
+          <Search size={18} className="text-white ml-2 cursor-pointer" onClick={() => navigate('/search')} />
         </div>
       </div>
 

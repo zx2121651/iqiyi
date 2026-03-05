@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import request from '@/utils/request';
 import { ChevronLeft, Share2, Heart, Star, Download, MessageSquare } from 'lucide-react';
@@ -60,6 +60,46 @@ export const VideoDetail = () => {
     return <div className="flex h-screen w-full items-center justify-center bg-[#121212] text-white">加载中...</div>;
   }
 
+  const [comments] = useState([
+    { id: 1, user: '用户A', avatar: 'https://dummyimage.com/100x100/333/fff&text=A', content: '这个视频拍得太好了！', time: '2小时前' },
+    { id: 2, user: '用户B', avatar: 'https://dummyimage.com/100x100/444/fff&text=B', content: '剧情很紧凑，推荐大家看。', time: '5小时前' },
+    { id: 3, user: '用户C', avatar: 'https://dummyimage.com/100x100/555/fff&text=C', content: '绝了绝了，一口气看完！', time: '1天前' },
+  ]);
+
+  const [danmakuList] = useState([
+    { text: '前方高能', time: 2, color: '#ff0000' },
+    { text: '绝了', time: 4, color: '#ffffff' },
+    { text: '哈哈哈哈哈', time: 5, color: '#ffff00' },
+    { text: '这段演技炸裂', time: 8, color: '#ffffff' },
+    { text: '来了来了', time: 1, color: '#ffffff' },
+  ]);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [currentDanmaku, setCurrentDanmaku] = useState<{text:string, color:string, top:number, id:number}[]>([]);
+
+  useEffect(() => {
+    let interval: any;
+    if (videoRef.current) {
+      interval = setInterval(() => {
+        if (!videoRef.current || videoRef.current.paused) return;
+        const time = Math.floor(videoRef.current.currentTime);
+        const newDanmaku = danmakuList.filter(d => d.time === time).map((d, i) => ({
+          ...d,
+          top: Math.random() * 60 + 10, // random top percentage
+          id: Date.now() + i
+        }));
+        if (newDanmaku.length > 0) {
+          setCurrentDanmaku(prev => [...prev, ...newDanmaku]);
+          // clean up old
+          setTimeout(() => {
+             setCurrentDanmaku(prev => prev.filter(p => !newDanmaku.find(n => n.id === p.id)));
+          }, 4000);
+        }
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [danmakuList]);
+
   return (
     <div className="w-full min-h-screen bg-[#121212] text-dark-text pb-6">
       {/* 顶部固定导航条 (悬浮在视频上方或视频上方留出空间) */}
@@ -73,17 +113,42 @@ export const VideoDetail = () => {
       </div>
 
       {/* 视频播放器区域 (固定 16:9 比例) */}
-      <div className="w-full aspect-video bg-black sticky top-0 z-40">
+      <div className="w-full aspect-video bg-black sticky top-0 z-40 relative overflow-hidden">
         <video
-          src={detail.playUrl}
+          ref={videoRef}
+          src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"
           poster={detail.coverUrl}
           controls
           autoPlay
           playsInline
-          className="w-full h-full object-contain"
+          className="w-full h-full object-contain relative z-10"
         >
           您的浏览器不支持 video 标签。
         </video>
+
+        {/* 弹幕层 */}
+        <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden">
+          {currentDanmaku.map((item) => (
+            <div
+              key={item.id}
+              className="absolute whitespace-nowrap text-sm font-bold shadow-sm"
+              style={{
+                color: item.color,
+                top: `${item.top}%`,
+                animation: `danmakuMove 4s linear forwards`,
+                right: '-100%',
+              }}
+            >
+              {item.text}
+            </div>
+          ))}
+          <style>{`
+            @keyframes danmakuMove {
+              0% { right: -100%; transform: translateX(100%); }
+              100% { right: 100%; transform: translateX(-100%); }
+            }
+          `}</style>
+        </div>
       </div>
 
       {/* 视频详情区域 */}
@@ -131,6 +196,29 @@ export const VideoDetail = () => {
           <div className="flex flex-col items-center gap-1 cursor-pointer">
             <Share2 size={20} className="text-white/80" />
             <span className="text-[10px] text-dark-muted">分享</span>
+          </div>
+        </div>
+
+        {/* 评论区 */}
+        <div className="mb-6">
+          <h3 className="text-base font-bold mb-3 text-white/90">精彩评论 ({formatCount(detail.commentCount)})</h3>
+          <div className="flex flex-col gap-4">
+            {comments.map((comment) => (
+              <div key={comment.id} className="flex gap-3">
+                <img src={comment.avatar} alt="avatar" className="w-8 h-8 rounded-full flex-shrink-0" />
+                <div className="flex flex-col flex-1 border-b border-gray-800 pb-3">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs text-dark-muted font-medium">{comment.user}</span>
+                    <span className="text-[10px] text-dark-muted">{comment.time}</span>
+                  </div>
+                  <p className="text-sm text-white/90">{comment.content}</p>
+                  <div className="flex items-center gap-4 mt-2">
+                    <span className="text-[10px] text-dark-muted flex items-center gap-1 cursor-pointer"><Heart size={12} /> 点赞</span>
+                    <span className="text-[10px] text-dark-muted flex items-center gap-1 cursor-pointer"><MessageSquare size={12} /> 回复</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 

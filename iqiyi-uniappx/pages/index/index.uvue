@@ -8,6 +8,7 @@
         <text class="nav-item">电视剧</text>
         <text class="nav-item">电影</text>
         <text class="nav-item">综艺</text>
+        <text class="search-icon" @click="goToSearch">🔍</text>
       </view>
     </view>
 
@@ -89,6 +90,12 @@ const goToDetail = (id: string) => {
   })
 }
 
+const goToSearch = () => {
+  uni.navigateTo({
+    url: '/pages/search/search'
+  })
+}
+
 // 下拉刷新
 const onRefresh = () => {
   isRefreshing.value = true
@@ -153,6 +160,11 @@ console.log('首页加载完成，获取到Mock数据：', videos.value.length)
 .active {
   color: #ffffff;
   font-weight: bold;
+}
+.search-icon {
+  font-size: 16px;
+  margin-left: 12px;
+  color: #ffffff;
 }
 .banner-swiper {
   width: 100%;
