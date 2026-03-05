@@ -79,7 +79,7 @@ export const VideoDetail = () => {
 
   useEffect(() => {
     let interval: any;
-    if (videoRef.current) {
+    if (videoRef.current && !loading && detail) {
       interval = setInterval(() => {
         if (!videoRef.current || videoRef.current.paused) return;
         const time = Math.floor(videoRef.current.currentTime);
@@ -98,7 +98,7 @@ export const VideoDetail = () => {
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [danmakuList]);
+  }, [danmakuList, loading, detail]);
 
   return (
     <div className="w-full min-h-screen bg-[#121212] text-dark-text pb-6">

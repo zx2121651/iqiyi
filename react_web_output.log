@@ -80,3 +80,14 @@
 10:05:58 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/VideoDetail.tsx
 10:06:50 AM [vite] (client) ✨ new dependencies optimized: framer-motion
 10:06:50 AM [vite] (client) ✨ optimized dependencies changed. reloading
+10:13:41 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/Home.tsx
+10:14:36 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/Home.tsx
+10:15:21 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/Home.tsx
+10:16:29 AM [vite:mock] request invoke /api/home/banners
+10:16:29 AM [vite:mock] request invoke /api/home/videos
+10:16:29 AM [vite:mock] request invoke /api/home/banners
+10:16:29 AM [vite:mock] request invoke /api/home/videos
+10:16:30 AM [vite:mock] request invoke /api/home/banners
+10:16:30 AM [vite:mock] request invoke /api/home/videos
+10:18:39 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/VideoDetail.tsx
+10:19:56 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/VideoDetail.tsx
