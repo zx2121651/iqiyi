@@ -1,5 +1,5 @@
 <template>
-  <view class="container">
+  <scroll-view class="container" :scroll-y="true" @refresherrefresh="onRefresh" :refresher-enabled="true" :refresher-triggered="isRefreshing" @scrolltolower="onLoadMore">
     <!-- 顶部导航条 -->
     <view class="top-nav">
       <text class="logo">iQIYI</text>
@@ -44,7 +44,10 @@
         <text class="card-desc">{{ item.desc }}</text>
       </view>
     </view>
-  </view>
+    <view class="loading-more" v-if="isLoadingMore">
+      <text class="loading-text">加载更多中...</text>
+    </view>
+  </scroll-view>
 </template>
 
 <script setup lang="uts">
@@ -53,6 +56,8 @@ import { ref } from 'vue'
 
 const banners = ref(homeMockData.banners)
 const videos = ref(homeMockData.videos)
+const isRefreshing = ref(false)
+const isLoadingMore = ref(false)
 
 // 格式化播放量
 const formatCount = (count: number): string => {
@@ -66,6 +71,33 @@ const goToDetail = (id: string) => {
   uni.navigateTo({
     url: '/pages/video-detail/video-detail?id=' + id
   })
+}
+
+// 下拉刷新
+const onRefresh = () => {
+  isRefreshing.value = true
+  setTimeout(() => {
+    // 模拟刷新数据，将现有数据打乱
+    videos.value = [...homeMockData.videos].sort(() => Math.random() - 0.5)
+    isRefreshing.value = false
+    uni.showToast({ title: '刷新成功', icon: 'none' })
+  }, 1000)
+}
+
+// 上拉加载更多
+const onLoadMore = () => {
+  if (isLoadingMore.value) return
+  isLoadingMore.value = true
+  setTimeout(() => {
+    // 模拟追加数据
+    const moreVideos = homeMockData.videos.map(v => ({
+      ...v,
+      id: v.id + '_more_' + Date.now(),
+      title: v.title + ' (新)'
+    }))
+    videos.value.push(...moreVideos)
+    isLoadingMore.value = false
+  }, 1000)
 }
 
 console.log('首页加载完成，获取到Mock数据：', videos.value.length)
@@ -221,5 +253,16 @@ console.log('首页加载完成，获取到Mock数据：', videos.value.length)
   margin-top: 2px;
   lines: 1;
   text-overflow: ellipsis;
+}
+
+.loading-more {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+}
+.loading-text {
+  color: #888888;
+  font-size: 14px;
 }
 </style>

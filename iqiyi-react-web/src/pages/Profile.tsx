@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Settings, Bell, Scan, ChevronRight, PlaySquare, Star, Clock, Download, Wallet, Headphones } from 'lucide-react';
 
 export const Profile = () => {

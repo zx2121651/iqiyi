@@ -3,41 +3,67 @@
 > vite
 
 
-  VITE v7.3.1  ready in 1349 ms
+  VITE v7.3.1  ready in 484 ms
 
   ➜  Local:   http://localhost:3000/
   ➜  Network: use --host to expose
-9:36:32 PM [vite:mock] request invoke /api/home/banners
-9:36:32 PM [vite:mock] request invoke /api/home/videos
-9:36:32 PM [vite:mock] request invoke /api/home/banners
-9:36:32 PM [vite:mock] request invoke /api/home/videos
-10:04:56 PM [vite:mock] mock file add /app/iqiyi-react-web/src/mock/shortVideo.ts
-10:05:10 PM [vite] (client) hmr update /src/styles/globals.css, /src/pages/ShortVideo.tsx
-10:07:50 PM [vite] (client) hmr update /src/styles/globals.css, /src/pages/Profile.tsx
-10:10:30 PM [vite:mock] request invoke /api/short-video/list
-10:10:30 PM [vite:mock] request invoke /api/short-video/list
-3:28:15 AM [vite:mock] mock file add /app/iqiyi-react-web/src/mock/vip.ts
-3:28:35 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/VIP.tsx
-3:31:34 AM [vite:mock] request invoke /api/vip/privileges
-3:31:34 AM [vite:mock] request invoke /api/vip/recommends
-3:31:34 AM [vite:mock] request invoke /api/vip/privileges
-3:31:34 AM [vite:mock] request invoke /api/vip/recommends
-4:32:52 AM [vite:mock] mock file add /app/iqiyi-react-web/src/mock/videoDetail.ts
-4:33:15 AM [vite] (client) hmr update /src/styles/globals.css, /src/App.tsx
-4:33:25 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/Home.tsx
-4:37:53 AM [vite:mock] request invoke /api/video/detail?id=1
-4:37:53 AM [vite:mock] request invoke /api/video/related
-4:37:53 AM [vite:mock] request invoke /api/video/detail?id=1
-4:37:53 AM [vite:mock] request invoke /api/video/related
-4:42:13 AM [vite:mock] request invoke /api/video/detail?id=1
-4:42:13 AM [vite:mock] request invoke /api/video/related
-4:42:13 AM [vite:mock] request invoke /api/video/detail?id=1
-4:42:13 AM [vite:mock] request invoke /api/video/related
-4:48:10 AM [vite:mock] request invoke /api/video/detail?id=1
-4:48:10 AM [vite:mock] request invoke /api/video/related
-4:48:10 AM [vite:mock] request invoke /api/video/detail?id=1
-4:48:10 AM [vite:mock] request invoke /api/video/related
-4:49:57 AM [vite:mock] request invoke /api/video/detail?id=1
-4:49:57 AM [vite:mock] request invoke /api/video/related
-4:49:57 AM [vite:mock] request invoke /api/video/detail?id=1
-4:49:57 AM [vite:mock] request invoke /api/video/related
+8:39:03 AM [vite:mock] request invoke /api/home/banners
+8:39:03 AM [vite:mock] request invoke /api/home/videos
+8:39:03 AM [vite:mock] request invoke /api/home/banners
+8:39:03 AM [vite:mock] request invoke /api/home/videos
+8:39:05 AM [vite:mock] request invoke /api/short-video/list
+8:39:05 AM [vite:mock] request invoke /api/short-video/list
+8:39:06 AM [vite:mock] request invoke /api/vip/privileges
+8:39:06 AM [vite:mock] request invoke /api/vip/recommends
+8:39:06 AM [vite:mock] request invoke /api/vip/privileges
+8:39:06 AM [vite:mock] request invoke /api/vip/recommends
+8:39:09 AM [vite:mock] request invoke /api/home/banners
+8:39:09 AM [vite:mock] request invoke /api/home/videos
+8:39:09 AM [vite:mock] request invoke /api/home/banners
+8:39:09 AM [vite:mock] request invoke /api/home/videos
+8:40:26 AM [vite:mock] request invoke /api/home/banners
+8:40:26 AM [vite:mock] request invoke /api/home/videos
+8:40:26 AM [vite:mock] request invoke /api/home/banners
+8:40:26 AM [vite:mock] request invoke /api/home/videos
+8:40:28 AM [vite:mock] request invoke /api/short-video/list
+8:40:28 AM [vite:mock] request invoke /api/short-video/list
+8:40:29 AM [vite:mock] request invoke /api/vip/privileges
+8:40:29 AM [vite:mock] request invoke /api/vip/recommends
+8:40:29 AM [vite:mock] request invoke /api/vip/privileges
+8:40:29 AM [vite:mock] request invoke /api/vip/recommends
+8:40:31 AM [vite:mock] request invoke /api/home/banners
+8:40:31 AM [vite:mock] request invoke /api/home/videos
+8:40:31 AM [vite:mock] request invoke /api/home/banners
+8:40:31 AM [vite:mock] request invoke /api/home/videos
+8:41:38 AM [vite:mock] request invoke /api/home/banners
+8:41:38 AM [vite:mock] request invoke /api/home/videos
+8:41:38 AM [vite:mock] request invoke /api/home/banners
+8:41:38 AM [vite:mock] request invoke /api/home/videos
+8:41:39 AM [vite:mock] request invoke /api/short-video/list
+8:41:39 AM [vite:mock] request invoke /api/short-video/list
+8:41:40 AM [vite:mock] request invoke /api/vip/privileges
+8:41:40 AM [vite:mock] request invoke /api/vip/recommends
+8:41:40 AM [vite:mock] request invoke /api/vip/privileges
+8:41:40 AM [vite:mock] request invoke /api/vip/recommends
+8:41:43 AM [vite:mock] request invoke /api/home/banners
+8:41:43 AM [vite:mock] request invoke /api/home/videos
+8:41:43 AM [vite:mock] request invoke /api/home/banners
+8:41:43 AM [vite:mock] request invoke /api/home/videos
+8:42:48 AM [vite:mock] request invoke /api/home/banners
+8:42:48 AM [vite:mock] request invoke /api/home/videos
+8:42:48 AM [vite:mock] request invoke /api/home/banners
+8:42:48 AM [vite:mock] request invoke /api/home/videos
+8:42:49 AM [vite:mock] request invoke /api/short-video/list
+8:42:49 AM [vite:mock] request invoke /api/short-video/list
+8:42:51 AM [vite:mock] request invoke /api/vip/privileges
+8:42:51 AM [vite:mock] request invoke /api/vip/recommends
+8:42:51 AM [vite:mock] request invoke /api/vip/privileges
+8:42:51 AM [vite:mock] request invoke /api/vip/recommends
+8:42:53 AM [vite:mock] request invoke /api/home/banners
+8:42:53 AM [vite:mock] request invoke /api/home/videos
+8:42:53 AM [vite:mock] request invoke /api/home/banners
+8:42:53 AM [vite:mock] request invoke /api/home/videos
+8:42:53 AM [vite:mock] request invoke /api/video/detail?id=340000201904091750
+8:42:53 AM [vite:mock] request invoke /api/video/related
+8:42:53 AM [vite:mock] request invoke /api/video/detail?id=340000201904091750
+8:42:53 AM [vite:mock] request invoke /api/video/related

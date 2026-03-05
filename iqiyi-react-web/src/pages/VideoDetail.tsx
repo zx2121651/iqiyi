@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import request from '@/utils/request';
 import { ChevronLeft, Share2, Heart, Star, Download, MessageSquare } from 'lucide-react';

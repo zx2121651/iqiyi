@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import request from '@/utils/request';
 import { Heart, MessageCircle, Share2, Plus } from 'lucide-react';
 

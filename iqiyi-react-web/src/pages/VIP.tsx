@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import request from '@/utils/request';
-import { Crown, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Crown, ChevronRight } from 'lucide-react';
 
 interface Privilege {
   icon: string;
