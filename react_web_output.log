@@ -91,3 +91,8 @@
 10:16:30 AM [vite:mock] request invoke /api/home/videos
 10:18:39 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/VideoDetail.tsx
 10:19:56 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/VideoDetail.tsx
+10:26:47 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/Home.tsx
+10:29:07 AM [vite:mock] request invoke /api/home/banners
+10:29:07 AM [vite:mock] request invoke /api/home/videos
+10:29:07 AM [vite:mock] request invoke /api/home/banners
+10:29:07 AM [vite:mock] request invoke /api/home/videos

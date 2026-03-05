@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import request from '@/utils/request';
 import { useNavigate } from 'react-router-dom';
-import { Play, Search, Loader2 } from 'lucide-react';
+import { Play, Search, Loader2, Crown, Sparkles, Film, Gamepad2, Music } from 'lucide-react';
 import { motion, useAnimation } from 'framer-motion';
 import { useRef } from 'react';
 
@@ -78,6 +78,14 @@ export const Home = () => {
     }
   };
 
+  const kingKongList = [
+    { name: 'VIP专区', icon: <Crown size={24} className="text-[#e8c081]" />, bg: 'bg-[#3a280c]' },
+    { name: '动漫', icon: <Sparkles size={24} className="text-purple-400" />, bg: 'bg-purple-500/20' },
+    { name: '纪录片', icon: <Film size={24} className="text-blue-400" />, bg: 'bg-blue-500/20' },
+    { name: '游戏', icon: <Gamepad2 size={24} className="text-green-400" />, bg: 'bg-green-500/20' },
+    { name: '音乐', icon: <Music size={24} className="text-pink-400" />, bg: 'bg-pink-500/20' },
+  ];
+
   const loadMoreData = async () => {
     setIsLoadingMore(true);
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -153,6 +161,23 @@ export const Home = () => {
                 ></div>
               ))}
             </div>
+          </div>
+
+          {/* 分类金刚区 (Kingkong 图标导航) */}
+          <div className="flex justify-between items-center mb-4 px-2">
+            {kingKongList.map((item, index) => (
+              <motion.div
+                key={index}
+                className="flex flex-col items-center gap-1.5 cursor-pointer"
+                whileTap={{ scale: 0.9 }}
+                onClick={() => alert(`点击分类: ${item.name}`)}
+              >
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${item.bg}`}>
+                  {item.icon}
+                </div>
+                <span className="text-xs text-white/80 font-medium">{item.name}</span>
+              </motion.div>
+            ))}
           </div>
 
           {/* 继续观看 (新加模块) */}

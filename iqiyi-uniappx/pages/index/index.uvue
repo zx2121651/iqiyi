@@ -25,6 +25,16 @@
       </swiper-item>
     </swiper>
 
+    <!-- 分类金刚区 (Kingkong 图标导航) -->
+    <view class="kingkong-grid">
+      <view class="kingkong-item" v-for="(item, index) in kingKongList" :key="index" @click="clickKingKong(item.name)">
+        <view class="kingkong-icon-wrap" :style="{ backgroundColor: item.bgColor }">
+          <text class="kingkong-icon" :style="{ color: item.iconColor }">{{ item.icon }}</text>
+        </view>
+        <text class="kingkong-text">{{ item.name }}</text>
+      </view>
+    </view>
+
     <!-- 继续观看 -->
     <view class="continue-watching" @click="goToDetail('v1')">
       <view class="cw-info">
@@ -91,8 +101,20 @@ const isRefreshing = ref(false)
 const isLoadingMore = ref(false)
 const activeCardIndex = ref(-1)
 
+const kingKongList = [
+  { name: 'VIP专区', icon: '👑', bgColor: '#3a280c', iconColor: '#e8c081' },
+  { name: '动漫', icon: '✨', bgColor: 'rgba(168, 85, 247, 0.2)', iconColor: '#c084fc' },
+  { name: '纪录片', icon: '🎞️', bgColor: 'rgba(59, 130, 246, 0.2)', iconColor: '#60a5fa' },
+  { name: '游戏', icon: '🎮', bgColor: 'rgba(34, 197, 94, 0.2)', iconColor: '#4ade80' },
+  { name: '音乐', icon: '🎵', bgColor: 'rgba(236, 72, 153, 0.2)', iconColor: '#f472b6' }
+]
+
 const tabs = ['推荐', '电视剧', '电影', '综艺']
 const activeTab = ref('推荐')
+
+const clickKingKong = (name: string) => {
+  uni.showToast({ title: '点击分类: ' + name, icon: 'none' })
+}
 
 const switchTab = (tab: string) => {
   if (activeTab.value === tab) return
@@ -241,6 +263,37 @@ console.log('首页加载完成，获取到Mock数据：', videos.value.length)
   font-weight: bold;
   lines: 1;
   text-overflow: ellipsis;
+}
+
+/* 金刚区 */
+.kingkong-grid {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0 8px;
+  margin-bottom: 24px;
+}
+.kingkong-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.kingkong-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.kingkong-icon {
+  font-size: 24px;
+}
+.kingkong-text {
+  color: rgba(255,255,255,0.8);
+  font-size: 12px;
+  font-weight: bold;
 }
 
 /* 继续观看 */
