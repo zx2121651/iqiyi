@@ -62,6 +62,43 @@
       </view>
     </scroll-view>
 
+    <!-- 专属频道卡片 (正在热播) -->
+    <view class="special-channel" v-if="videos.length >= 3">
+      <view class="sc-header">
+        <view class="sc-title-box">
+          <text class="sc-title">🔥 正在热播</text>
+          <text class="sc-subtitle">全网首播，不容错过</text>
+        </view>
+        <text class="sc-more">查看更多 &gt;</text>
+      </view>
+
+      <view class="sc-layout">
+        <!-- 左大图 -->
+        <view class="sc-left" @click="goToDetail(videos[0].id)">
+          <image class="sc-cover" :src="videos[0].coverUrl" mode="aspectFill"></image>
+          <view class="sc-bottom-mask">
+            <text class="sc-video-title">{{ videos[0].title }}</text>
+          </view>
+        </view>
+
+        <!-- 右双图 -->
+        <view class="sc-right">
+          <view class="sc-right-item" @click="goToDetail(videos[1].id)">
+            <image class="sc-cover" :src="videos[1].coverUrl" mode="aspectFill"></image>
+            <view class="sc-bottom-mask">
+              <text class="sc-video-title">{{ videos[1].title }}</text>
+            </view>
+          </view>
+          <view class="sc-right-item mt-gap" @click="goToDetail(videos[2].id)">
+            <image class="sc-cover" :src="videos[2].coverUrl" mode="aspectFill"></image>
+            <view class="sc-bottom-mask">
+              <text class="sc-video-title">{{ videos[2].title }}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <!-- 热门推荐列表 -->
     <view class="section-title">
       <text class="section-title-text">热门推荐</text>
@@ -334,6 +371,91 @@ console.log('首页加载完成，获取到Mock数据：', videos.value.length)
   color: #00cc33;
   font-size: 18px;
   margin-left: 2px;
+}
+
+/* 专属频道卡片 */
+.special-channel {
+  background-image: linear-gradient(to bottom right, #2b1f1f, #1a1212);
+  border-width: 1px;
+  border-color: #3d2727;
+  border-style: solid;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.sc-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+.sc-title-box {
+  display: flex;
+  flex-direction: column;
+}
+.sc-title {
+  color: #ff4d4f;
+  font-size: 18px;
+  font-weight: bold;
+  font-style: italic;
+  letter-spacing: 1px;
+}
+.sc-subtitle {
+  color: rgba(255, 77, 79, 0.7);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.sc-more {
+  color: #ff4d4f;
+  font-size: 12px;
+}
+.sc-layout {
+  display: flex;
+  flex-direction: row;
+  height: 200px;
+}
+.sc-left {
+  flex: 1;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-right: 8px;
+  background-color: #1f1f1f;
+}
+.sc-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.sc-right-item {
+  flex: 1;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #1f1f1f;
+}
+.mt-gap {
+  margin-top: 8px;
+}
+.sc-cover {
+  width: 100%;
+  height: 100%;
+}
+.sc-bottom-mask {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 6px;
+  background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+.sc-video-title {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+  lines: 1;
+  text-overflow: ellipsis;
 }
 
 /* 重磅热播 */

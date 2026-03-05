@@ -212,6 +212,54 @@ export const Home = () => {
             </div>
           </div>
 
+          {/* 专属频道卡片 (如“正在热播”、“即将上线”) */}
+          <div className="mb-6 p-4 rounded-xl bg-gradient-to-br from-[#2b1f1f] to-[#1a1212] border border-[#3d2727] relative overflow-hidden">
+            {/* 装饰性背景光晕 */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div className="flex justify-between items-end mb-3">
+              <div>
+                <h2 className="text-lg font-black text-[#ff4d4f] italic tracking-wide">🔥 正在热播</h2>
+                <p className="text-xs text-[#ff4d4f]/70 mt-0.5">全网首播，不容错过</p>
+              </div>
+              <span className="text-xs text-[#ff4d4f] cursor-pointer hover:underline">查看更多 &gt;</span>
+            </div>
+
+            {/* 混合排版：左边一个大视频，右边两个小视频堆叠 */}
+            {videos.length >= 3 && (
+              <div className="grid grid-cols-2 gap-2 h-[200px]">
+                {/* 左大图 */}
+                <motion.div
+                  className="relative rounded-lg overflow-hidden cursor-pointer"
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate(`/video/${videos[0].id}`)}
+                >
+                  <img src={videos[0].coverUrl} alt={videos[0].title} className="w-full h-full object-cover" />
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                    <span className="text-white text-sm font-bold truncate block">{videos[0].title}</span>
+                  </div>
+                </motion.div>
+
+                {/* 右双图 */}
+                <div className="flex flex-col gap-2">
+                  {[videos[1], videos[2]].map((item, idx) => (
+                    <motion.div
+                      key={`special-${idx}`}
+                      className="relative flex-1 rounded-lg overflow-hidden cursor-pointer bg-dark-card"
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => navigate(`/video/${item.id}`)}
+                    >
+                      <img src={item.coverUrl} alt={item.title} className="absolute inset-0 w-full h-full object-cover" />
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-1.5">
+                        <span className="text-white text-xs font-bold truncate block">{item.title}</span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* 猜你在追 / 热门推荐 */}
           <div>
             <h2 className="text-lg font-bold mb-3 flex items-center text-white">
