@@ -1,7 +1,9 @@
-import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Home, PlaySquare, Crown, User } from 'lucide-react';
 import classNames from 'classnames';
+import { AnimatePresence } from 'framer-motion';
+import PageTransition from './PageTransition';
 
 /**
  * 底部导航栏组件 (Layout)
@@ -15,11 +17,17 @@ export const Layout = () => {
     { name: '我的', path: '/profile', icon: <User size={24} /> },
   ];
 
+  const location = useLocation();
+
   return (
     <div className="flex flex-col h-screen w-full bg-dark-bg text-dark-text overflow-hidden">
       {/* 页面主内容区，支持滚动 */}
-      <div className="flex-1 overflow-y-auto">
-        <Outlet />
+      <div className="flex-1 overflow-y-auto relative">
+        <AnimatePresence mode="wait">
+          <PageTransition key={location.pathname} className="w-full h-full">
+            <Outlet />
+          </PageTransition>
+        </AnimatePresence>
       </div>
 
       {/* 固定的底部导航栏 */}

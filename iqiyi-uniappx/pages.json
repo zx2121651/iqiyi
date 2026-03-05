@@ -39,6 +39,22 @@
         "navigationBarTextStyle": "white",
         "backgroundColor": "#121212"
       }
+    },
+    {
+      "path": "pages/search/search",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#121212"
+      }
+    },
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#121212"
+      }
     }
   ],
   "globalStyle": {

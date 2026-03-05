@@ -5,7 +5,7 @@ export default [
   {
     url: '/api/video/detail',
     method: 'get',
-    response: (req) => {
+    response: (req: any) => {
       return {
         code: 200,
         message: 'success',

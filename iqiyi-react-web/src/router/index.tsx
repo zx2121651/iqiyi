@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { createBrowserRouter } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import Home from '@/pages/Home';
@@ -6,6 +6,8 @@ import ShortVideo from '@/pages/ShortVideo';
 import VIP from '@/pages/VIP';
 import Profile from '@/pages/Profile';
 import VideoDetail from '@/pages/VideoDetail';
+import Search from '@/pages/Search';
+import Login from '@/pages/Login';
 
 /**
  * 路由配置对象
@@ -26,6 +28,14 @@ export const router = createBrowserRouter([
   {
     path: '/video/:id',
     element: <VideoDetail />,
+  },
+  {
+    path: '/search',
+    element: <Search />,
+  },
+  {
+    path: '/login',
+    element: <Login />,
   },
   // 未匹配到的路由可以添加一个 404 页面
   {

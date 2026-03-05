@@ -1,8 +1,11 @@
-import React from 'react';
-import { Settings, Bell, Scan, ChevronRight, PlaySquare, Star, Clock, Download, Wallet, Headphones } from 'lucide-react';
+
+import { Settings, Bell, Scan, ChevronRight, PlaySquare, Star, Clock, Download, Wallet, Headphones, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import useAuthStore from '@/store/auth';
 
 export const Profile = () => {
-  const isLogin = false; // 模拟未登录状态
+  const navigate = useNavigate();
+  const { isLogin, user, logout } = useAuthStore();
 
   const services = [
     { icon: <Clock size={28} className="text-orange-400" />, name: '观看历史' },
@@ -32,16 +35,18 @@ export const Profile = () => {
 
       <div className="px-4">
         {/* 用户头部信息区 */}
-        <div className="flex items-center gap-4 mb-6 mt-2">
-          <div className="w-16 h-16 rounded-full bg-gray-700 overflow-hidden shadow-lg border-2 border-white/10">
-            {/* 头像占位 */}
-            <img src="https://dummyimage.com/100x100/333/fff&text=Guest" alt="avatar" className="w-full h-full object-cover" />
+        <div
+          className="flex items-center gap-4 mb-6 mt-2 cursor-pointer"
+          onClick={() => !isLogin && navigate('/login')}
+        >
+          <div className="w-16 h-16 rounded-full bg-gray-700 overflow-hidden shadow-lg border-2 border-white/10 flex-shrink-0">
+            <img src={isLogin && user?.avatar ? user.avatar : "https://dummyimage.com/100x100/333/fff&text=Guest"} alt="avatar" className="w-full h-full object-cover" />
           </div>
-          <div className="flex flex-col justify-center flex-1">
-            <h1 className="text-xl font-bold">{isLogin ? 'VIP用户' : '点击登录/注册'}</h1>
-            <p className="text-xs text-dark-muted mt-1">{isLogin ? '爱奇艺号: 12345678' : '登录后享受更多精彩内容'}</p>
+          <div className="flex flex-col justify-center flex-1 overflow-hidden">
+            <h1 className="text-xl font-bold text-white truncate">{isLogin ? user?.name : '点击登录/注册'}</h1>
+            <p className="text-xs text-dark-muted mt-1 truncate">{isLogin ? `爱奇艺号: ${user?.id}` : '登录后享受更多精彩内容'}</p>
           </div>
-          <ChevronRight className="text-dark-muted" />
+          <ChevronRight className="text-dark-muted flex-shrink-0" />
         </div>
 
         {/* VIP 黑金卡片 */}
@@ -76,7 +81,7 @@ export const Profile = () => {
           {tools.map((item, idx) => (
             <div
               key={idx}
-              className={`flex items-center justify-between p-4 cursor-pointer active:bg-white/5 transition-colors ${idx !== tools.length - 1 ? 'border-b border-white/5' : ''}`}
+              className={`flex items-center justify-between p-4 cursor-pointer active:bg-white/5 transition-colors ${idx !== tools.length - 1 || isLogin ? 'border-b border-white/5' : ''}`}
             >
               <div className="flex items-center gap-3">
                 {item.icon}
@@ -88,6 +93,19 @@ export const Profile = () => {
               </div>
             </div>
           ))}
+          {isLogin && (
+            <div
+              className="flex items-center justify-center p-4 cursor-pointer active:bg-white/5 transition-colors text-red-500 gap-2"
+              onClick={() => {
+                if (window.confirm('确定要退出登录吗？')) {
+                  logout();
+                }
+              }}
+            >
+              <LogOut size={18} />
+              <span className="text-sm font-medium">退出登录</span>
+            </div>
+          )}
         </div>
 
       </div>

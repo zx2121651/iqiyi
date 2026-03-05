@@ -12,10 +12,13 @@
       <video
         id="myVideo"
         class="video-player"
-        :src="detail.playUrl"
+        src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"
         :poster="detail.coverUrl"
         autoplay="true"
         controls="true"
+        :danmu-list="danmuList"
+        enable-danmu="true"
+        danmu-btn="true"
         object-fit="contain">
       </video>
     </view>
@@ -39,6 +42,27 @@
 
         <!-- 简介 -->
         <text class="video-desc">{{ detail.desc }}</text>
+
+        <!-- 评论区 -->
+        <view class="comment-section">
+          <text class="section-title">精彩评论 ({{ formatCount(detail.commentCount) }})</text>
+          <view class="comment-list">
+            <view class="comment-item" v-for="comment in comments" :key="comment.id">
+              <image class="comment-avatar" :src="comment.avatar" mode="aspectFill"></image>
+              <view class="comment-content-box">
+                <view class="comment-header">
+                  <text class="comment-user">{{ comment.user }}</text>
+                  <text class="comment-time">{{ comment.time }}</text>
+                </view>
+                <text class="comment-text">{{ comment.content }}</text>
+                <view class="comment-actions">
+                  <text class="comment-action-text">❤️ 点赞</text>
+                  <text class="comment-action-text">💬 回复</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
 
         <!-- 操作区 -->
         <view class="action-bar">
@@ -91,6 +115,20 @@ import { ref } from 'vue'
 
 const detail = ref(videoDetailMockData.detail)
 const related = ref(videoDetailMockData.related)
+
+const comments = ref([
+  { id: 1, user: '用户A', avatar: 'https://dummyimage.com/100x100/333/fff&text=A', content: '这个视频拍得太好了！', time: '2小时前' },
+  { id: 2, user: '用户B', avatar: 'https://dummyimage.com/100x100/444/fff&text=B', content: '剧情很紧凑，推荐大家看。', time: '5小时前' },
+  { id: 3, user: '用户C', avatar: 'https://dummyimage.com/100x100/555/fff&text=C', content: '绝了绝了，一口气看完！', time: '1天前' },
+])
+
+const danmuList = ref([
+  { text: '前方高能', color: '#ff0000', time: 2 },
+  { text: '绝了', color: '#ffffff', time: 4 },
+  { text: '哈哈哈哈哈', color: '#ffff00', time: 5 },
+  { text: '这段演技炸裂', color: '#ffffff', time: 8 },
+  { text: '来了来了', color: '#ffffff', time: 1 },
+])
 
 const formatCount = (count: number): string => {
   if (count > 10000) {
@@ -237,6 +275,68 @@ const reloadPage = (id: string) => {
 .action-num {
   color: #888888;
   font-size: 10px;
+}
+
+/* 评论区 */
+.comment-section {
+  margin-bottom: 24px;
+}
+.section-title {
+  color: rgba(255,255,255,0.9);
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.comment-list {
+  display: flex;
+  flex-direction: column;
+}
+.comment-item {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 16px;
+}
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  margin-right: 12px;
+}
+.comment-content-box {
+  flex: 1;
+  border-bottom-width: 1px;
+  border-bottom-color: #333333;
+  border-bottom-style: solid;
+  padding-bottom: 12px;
+}
+.comment-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.comment-user {
+  color: #888888;
+  font-size: 12px;
+  font-weight: bold;
+}
+.comment-time {
+  color: #888888;
+  font-size: 10px;
+}
+.comment-text {
+  color: rgba(255,255,255,0.9);
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.comment-actions {
+  display: flex;
+  flex-direction: row;
+}
+.comment-action-text {
+  color: #888888;
+  font-size: 10px;
+  margin-right: 16px;
 }
 
 .recommend-section {

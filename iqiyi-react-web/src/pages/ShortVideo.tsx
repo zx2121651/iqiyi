@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import request from '@/utils/request';
 import { Heart, MessageCircle, Share2, Plus } from 'lucide-react';
 
@@ -21,6 +21,8 @@ interface ShortVideoData {
 export const ShortVideo = () => {
   const [videos, setVideos] = useState<ShortVideoData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -50,13 +52,26 @@ export const ShortVideo = () => {
     ));
   };
 
+  const handleScroll = () => {
+    if (!containerRef.current) return;
+    const { scrollTop, clientHeight } = containerRef.current;
+    const index = Math.round(scrollTop / clientHeight);
+    if (index !== activeIndex) {
+      setActiveIndex(index);
+    }
+  };
+
   if (loading) {
     return <div className="flex h-screen w-full items-center justify-center bg-black text-white">加载中...</div>;
   }
 
   return (
     // 使用 h-screen 减去底部导航栏高度 (4rem/64px)，这里使用 calc
-    <div className="w-full h-[calc(100vh-4rem)] bg-black snap-y snap-mandatory overflow-y-scroll no-scrollbar relative">
+    <div
+      className="w-full h-[calc(100vh-4rem)] bg-black snap-y snap-mandatory overflow-y-scroll no-scrollbar relative"
+      ref={containerRef}
+      onScroll={handleScroll}
+    >
       {/* 顶部透明导航 */}
       <div className="fixed top-0 left-0 right-0 z-10 flex justify-center pt-10 pb-4 bg-gradient-to-b from-black/50 to-transparent pointer-events-none">
         <div className="flex gap-6 text-lg font-bold">
@@ -65,10 +80,27 @@ export const ShortVideo = () => {
         </div>
       </div>
 
-      {videos.map((item) => (
+      {videos.map((item, index) => (
         <div key={item.id} className="w-full h-full snap-start relative flex items-center justify-center bg-gray-900">
-          {/* 模拟视频封面 (实际开发中这里应是 <video> 标签) */}
-          <img src={item.coverUrl} alt="video" className="w-full h-full object-cover opacity-80" />
+          <video
+            src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4"
+            poster={item.coverUrl}
+            className="w-full h-full object-cover opacity-90"
+            loop
+            muted
+            playsInline
+            autoPlay={index === activeIndex}
+            ref={(el) => {
+              if (el) {
+                if (index === activeIndex) {
+                  el.play().catch(() => {});
+                } else {
+                  el.pause();
+                  el.currentTime = 0;
+                }
+              }
+            }}
+          />
 
           {/* 右侧互动区 */}
           <div className="absolute right-4 bottom-20 flex flex-col items-center gap-6 z-10">

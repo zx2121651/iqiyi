@@ -1,13 +1,17 @@
 <template>
-  <view class="container">
+  <scroll-view class="container" :scroll-y="true" @refresherrefresh="onRefresh" :refresher-enabled="true" :refresher-triggered="isRefreshing" @scrolltolower="onLoadMore">
     <!-- 顶部导航条 -->
     <view class="top-nav">
       <text class="logo">iQIYI</text>
       <view class="nav-links">
-        <text class="nav-item active">推荐</text>
-        <text class="nav-item">电视剧</text>
-        <text class="nav-item">电影</text>
-        <text class="nav-item">综艺</text>
+        <text
+          class="nav-item"
+          :class="{'active': activeTab === tab}"
+          v-for="tab in tabs"
+          :key="tab"
+          @click="switchTab(tab)"
+        >{{ tab }}</text>
+        <text class="search-icon" @click="goToSearch">🔍</text>
       </view>
     </view>
 
@@ -21,13 +25,87 @@
       </swiper-item>
     </swiper>
 
+    <!-- 分类金刚区 (Kingkong 图标导航) -->
+    <view class="kingkong-grid">
+      <view class="kingkong-item" v-for="(item, index) in kingKongList" :key="index" @click="clickKingKong(item.name)">
+        <view class="kingkong-icon-wrap" :style="{ backgroundColor: item.bgColor }">
+          <text class="kingkong-icon" :style="{ color: item.iconColor }">{{ item.icon }}</text>
+        </view>
+        <text class="kingkong-text">{{ item.name }}</text>
+      </view>
+    </view>
+
+    <!-- 继续观看 -->
+    <view class="continue-watching" @click="goToDetail('v1')">
+      <view class="cw-info">
+        <text class="cw-time">上次观看到 12:45</text>
+        <text class="cw-title">三体 第12集</text>
+      </view>
+      <view class="cw-play-btn">
+        <text class="cw-play-icon">▶</text>
+      </view>
+    </view>
+
+    <!-- 重磅热播 (横向滚动) -->
+    <view class="section-title">
+      <text class="section-title-text">重磅热播</text>
+    </view>
+    <scroll-view class="hot-scroll" :scroll-x="true">
+      <view class="hot-list">
+        <view class="hot-item" v-for="(item, index) in videos.slice(0, 5)" :key="'hot-'+index" @click="goToDetail(item.id)">
+          <view class="hot-cover-wrap">
+            <image class="hot-cover" :src="item.coverUrl" mode="aspectFill"></image>
+            <view class="vip-tag-small" v-if="item.isVip"><text class="vip-text-small">VIP</text></view>
+          </view>
+          <text class="hot-title">{{ item.title }}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 专属频道卡片 (正在热播) -->
+    <view class="special-channel" v-if="videos.length >= 3">
+      <view class="sc-header">
+        <view class="sc-title-box">
+          <text class="sc-title">🔥 正在热播</text>
+          <text class="sc-subtitle">全网首播，不容错过</text>
+        </view>
+        <text class="sc-more">查看更多 &gt;</text>
+      </view>
+
+      <view class="sc-layout">
+        <!-- 左大图 -->
+        <view class="sc-left" @click="goToDetail(videos[0].id)">
+          <image class="sc-cover" :src="videos[0].coverUrl" mode="aspectFill"></image>
+          <view class="sc-bottom-mask">
+            <text class="sc-video-title">{{ videos[0].title }}</text>
+          </view>
+        </view>
+
+        <!-- 右双图 -->
+        <view class="sc-right">
+          <view class="sc-right-item" @click="goToDetail(videos[1].id)">
+            <image class="sc-cover" :src="videos[1].coverUrl" mode="aspectFill"></image>
+            <view class="sc-bottom-mask">
+              <text class="sc-video-title">{{ videos[1].title }}</text>
+            </view>
+          </view>
+          <view class="sc-right-item mt-gap" @click="goToDetail(videos[2].id)">
+            <image class="sc-cover" :src="videos[2].coverUrl" mode="aspectFill"></image>
+            <view class="sc-bottom-mask">
+              <text class="sc-video-title">{{ videos[2].title }}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
     <!-- 热门推荐列表 -->
     <view class="section-title">
       <text class="section-title-text">热门推荐</text>
     </view>
 
     <view class="video-grid">
-      <view class="video-card" v-for="(item, index) in videos" :key="index" @click="goToDetail(item.id)">
+      <view class="video-card" v-for="(item, index) in videos" :key="index" @click="goToDetail(item.id)" @touchstart="onTouchStart(index)" @touchend="onTouchEnd(index)" @touchcancel="onTouchEnd(index)" :style="getCardStyle(index)">
         <view class="card-cover-wrap">
           <image class="card-cover" :src="item.coverUrl" mode="aspectFill"></image>
           <!-- VIP标识 -->
@@ -44,7 +122,10 @@
         <text class="card-desc">{{ item.desc }}</text>
       </view>
     </view>
-  </view>
+    <view class="loading-more" v-if="isLoadingMore">
+      <text class="loading-text">加载更多中...</text>
+    </view>
+  </scroll-view>
 </template>
 
 <script setup lang="uts">
@@ -53,6 +134,51 @@ import { ref } from 'vue'
 
 const banners = ref(homeMockData.banners)
 const videos = ref(homeMockData.videos)
+const isRefreshing = ref(false)
+const isLoadingMore = ref(false)
+const activeCardIndex = ref(-1)
+
+const kingKongList = [
+  { name: 'VIP专区', icon: '👑', bgColor: '#3a280c', iconColor: '#e8c081' },
+  { name: '动漫', icon: '✨', bgColor: 'rgba(168, 85, 247, 0.2)', iconColor: '#c084fc' },
+  { name: '纪录片', icon: '🎞️', bgColor: 'rgba(59, 130, 246, 0.2)', iconColor: '#60a5fa' },
+  { name: '游戏', icon: '🎮', bgColor: 'rgba(34, 197, 94, 0.2)', iconColor: '#4ade80' },
+  { name: '音乐', icon: '🎵', bgColor: 'rgba(236, 72, 153, 0.2)', iconColor: '#f472b6' }
+]
+
+const tabs = ['推荐', '电视剧', '电影', '综艺']
+const activeTab = ref('推荐')
+
+const clickKingKong = (name: string) => {
+  uni.showToast({ title: '点击分类: ' + name, icon: 'none' })
+}
+
+const switchTab = (tab: string) => {
+  if (activeTab.value === tab) return
+  activeTab.value = tab
+  // 模拟请求新数据
+  uni.showLoading({ title: '加载中' })
+  setTimeout(() => {
+    banners.value = [...homeMockData.banners].sort(() => Math.random() - 0.5)
+    videos.value = [...homeMockData.videos].sort(() => Math.random() - 0.5)
+    uni.hideLoading()
+  }, 500)
+}
+
+const onTouchStart = (index: number) => {
+  activeCardIndex.value = index
+}
+
+const onTouchEnd = (index: number) => {
+  activeCardIndex.value = -1
+}
+
+const getCardStyle = (index: number): string => {
+  if (activeCardIndex.value === index) {
+    return 'transform: scale(0.95); transition: transform 0.2s;'
+  }
+  return 'transform: scale(1); transition: transform 0.2s;'
+}
 
 // 格式化播放量
 const formatCount = (count: number): string => {
@@ -66,6 +192,39 @@ const goToDetail = (id: string) => {
   uni.navigateTo({
     url: '/pages/video-detail/video-detail?id=' + id
   })
+}
+
+const goToSearch = () => {
+  uni.navigateTo({
+    url: '/pages/search/search'
+  })
+}
+
+// 下拉刷新
+const onRefresh = () => {
+  isRefreshing.value = true
+  setTimeout(() => {
+    // 模拟刷新数据，将现有数据打乱
+    videos.value = [...homeMockData.videos].sort(() => Math.random() - 0.5)
+    isRefreshing.value = false
+    uni.showToast({ title: '刷新成功', icon: 'none' })
+  }, 1000)
+}
+
+// 上拉加载更多
+const onLoadMore = () => {
+  if (isLoadingMore.value) return
+  isLoadingMore.value = true
+  setTimeout(() => {
+    // 模拟追加数据
+    const moreVideos = homeMockData.videos.map(v => ({
+      ...v,
+      id: v.id + '_more_' + Date.now(),
+      title: v.title + ' (新)'
+    }))
+    videos.value.push(...moreVideos)
+    isLoadingMore.value = false
+  }, 1000)
 }
 
 console.log('首页加载完成，获取到Mock数据：', videos.value.length)
@@ -106,6 +265,11 @@ console.log('首页加载完成，获取到Mock数据：', videos.value.length)
   color: #ffffff;
   font-weight: bold;
 }
+.search-icon {
+  font-size: 16px;
+  margin-left: 12px;
+  color: #ffffff;
+}
 .banner-swiper {
   width: 100%;
   height: 180px;
@@ -134,6 +298,211 @@ console.log('首页加载完成，获取到Mock数据：', videos.value.length)
   color: #ffffff;
   font-size: 14px;
   font-weight: bold;
+  lines: 1;
+  text-overflow: ellipsis;
+}
+
+/* 金刚区 */
+.kingkong-grid {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 0 8px;
+  margin-bottom: 24px;
+}
+.kingkong-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.kingkong-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.kingkong-icon {
+  font-size: 24px;
+}
+.kingkong-text {
+  color: rgba(255,255,255,0.8);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* 继续观看 */
+.continue-watching {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1f1f1f;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+.cw-info {
+  display: flex;
+  flex-direction: column;
+}
+.cw-time {
+  color: #888888;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.cw-title {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
+}
+.cw-play-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background-color: rgba(0,204,51,0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.cw-play-icon {
+  color: #00cc33;
+  font-size: 18px;
+  margin-left: 2px;
+}
+
+/* 专属频道卡片 */
+.special-channel {
+  background-image: linear-gradient(to bottom right, #2b1f1f, #1a1212);
+  border-width: 1px;
+  border-color: #3d2727;
+  border-style: solid;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.sc-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+.sc-title-box {
+  display: flex;
+  flex-direction: column;
+}
+.sc-title {
+  color: #ff4d4f;
+  font-size: 18px;
+  font-weight: bold;
+  font-style: italic;
+  letter-spacing: 1px;
+}
+.sc-subtitle {
+  color: rgba(255, 77, 79, 0.7);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.sc-more {
+  color: #ff4d4f;
+  font-size: 12px;
+}
+.sc-layout {
+  display: flex;
+  flex-direction: row;
+  height: 200px;
+}
+.sc-left {
+  flex: 1;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-right: 8px;
+  background-color: #1f1f1f;
+}
+.sc-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.sc-right-item {
+  flex: 1;
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #1f1f1f;
+}
+.mt-gap {
+  margin-top: 8px;
+}
+.sc-cover {
+  width: 100%;
+  height: 100%;
+}
+.sc-bottom-mask {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 6px;
+  background-image: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+}
+.sc-video-title {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+  lines: 1;
+  text-overflow: ellipsis;
+}
+
+/* 重磅热播 */
+.hot-scroll {
+  width: 100%;
+  margin-bottom: 24px;
+}
+.hot-list {
+  display: flex;
+  flex-direction: row;
+}
+.hot-item {
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  margin-right: 12px;
+}
+.hot-cover-wrap {
+  width: 120px;
+  height: 160px;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  background-color: #1f1f1f;
+}
+.hot-cover {
+  width: 100%;
+  height: 100%;
+}
+.vip-tag-small {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #D4AF37;
+  padding: 2px 4px;
+  border-bottom-left-radius: 6px;
+}
+.vip-text-small {
+  color: #000000;
+  font-size: 10px;
+  font-weight: bold;
+}
+.hot-title {
+  color: rgba(255,255,255,0.9);
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 6px;
   lines: 1;
   text-overflow: ellipsis;
 }
@@ -221,5 +590,16 @@ console.log('首页加载完成，获取到Mock数据：', videos.value.length)
   margin-top: 2px;
   lines: 1;
   text-overflow: ellipsis;
+}
+
+.loading-more {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+}
+.loading-text {
+  color: #888888;
+  font-size: 14px;
 }
 </style>
