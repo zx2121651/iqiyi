@@ -27,7 +27,7 @@
     </view>
 
     <view class="video-grid">
-      <view class="video-card" v-for="(item, index) in videos" :key="index" @click="goToDetail(item.id)">
+      <view class="video-card" v-for="(item, index) in videos" :key="index" @click="goToDetail(item.id)" @touchstart="onTouchStart(index)" @touchend="onTouchEnd(index)" @touchcancel="onTouchEnd(index)" :style="getCardStyle(index)">
         <view class="card-cover-wrap">
           <image class="card-cover" :src="item.coverUrl" mode="aspectFill"></image>
           <!-- VIP标识 -->
@@ -58,6 +58,22 @@ const banners = ref(homeMockData.banners)
 const videos = ref(homeMockData.videos)
 const isRefreshing = ref(false)
 const isLoadingMore = ref(false)
+const activeCardIndex = ref(-1)
+
+const onTouchStart = (index: number) => {
+  activeCardIndex.value = index
+}
+
+const onTouchEnd = (index: number) => {
+  activeCardIndex.value = -1
+}
+
+const getCardStyle = (index: number): string => {
+  if (activeCardIndex.value === index) {
+    return 'transform: scale(0.95); transition: transform 0.2s;'
+  }
+  return 'transform: scale(1); transition: transform 0.2s;'
+}
 
 // 格式化播放量
 const formatCount = (count: number): string => {

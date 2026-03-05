@@ -67,3 +67,6 @@
 8:42:53 AM [vite:mock] request invoke /api/video/related
 8:42:53 AM [vite:mock] request invoke /api/video/detail?id=340000201904091750
 8:42:53 AM [vite:mock] request invoke /api/video/related
+9:07:30 AM [vite] (client) hmr update /src/styles/globals.css, /src/components/Layout.tsx
+9:07:37 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/Home.tsx
+9:07:42 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/Home.tsx

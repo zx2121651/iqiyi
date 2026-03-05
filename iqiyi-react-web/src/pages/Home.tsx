@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import request from '@/utils/request';
 import { useNavigate } from 'react-router-dom';
 import { Play } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface Banner {
   id: string;
@@ -101,13 +102,15 @@ export const Home = () => {
             </h2>
             <div className="grid grid-cols-2 gap-3">
               {videos.map((item) => (
-                <div
+                <motion.div
                   key={item.id}
-                  className="flex flex-col gap-1 rounded overflow-hidden"
+                  className="flex flex-col gap-1 rounded overflow-hidden cursor-pointer"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => navigate(`/video/${item.id}`)}
                 >
-                  <div className="relative aspect-[3/4] bg-dark-card rounded-lg overflow-hidden group cursor-pointer">
-                    <img src={item.coverUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <div className="relative aspect-[3/4] bg-dark-card rounded-lg overflow-hidden group">
+                    <img src={item.coverUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
 
                     {/* VIP 标识 */}
                     {item.isVip && (
@@ -127,7 +130,7 @@ export const Home = () => {
                   </div>
                   <h3 className="text-sm font-semibold truncate mt-1 text-white">{item.title}</h3>
                   <p className="text-xs text-dark-muted truncate">{item.desc}</p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
