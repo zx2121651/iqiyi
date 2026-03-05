@@ -5,6 +5,7 @@ import Home from '@/pages/Home';
 import ShortVideo from '@/pages/ShortVideo';
 import VIP from '@/pages/VIP';
 import Profile from '@/pages/Profile';
+import VideoDetail from '@/pages/VideoDetail';
 
 /**
  * 路由配置对象
@@ -20,6 +21,11 @@ export const router = createBrowserRouter([
       { path: '/vip', element: <VIP /> },
       { path: '/profile', element: <Profile /> },
     ],
+  },
+  // 独立于 Layout 的全屏页面
+  {
+    path: '/video/:id',
+    element: <VideoDetail />,
   },
   // 未匹配到的路由可以添加一个 404 页面
   {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import request from '@/utils/request';
+import { useNavigate } from 'react-router-dom';
 import { Play } from 'lucide-react';
 
 interface Banner {
@@ -19,6 +20,7 @@ interface Video {
 }
 
 export const Home = () => {
+  const navigate = useNavigate();
   const [banners, setBanners] = useState<Banner[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,7 +101,11 @@ export const Home = () => {
             </h2>
             <div className="grid grid-cols-2 gap-3">
               {videos.map((item) => (
-                <div key={item.id} className="flex flex-col gap-1 rounded overflow-hidden">
+                <div
+                  key={item.id}
+                  className="flex flex-col gap-1 rounded overflow-hidden"
+                  onClick={() => navigate(`/video/${item.id}`)}
+                >
                   <div className="relative aspect-[3/4] bg-dark-card rounded-lg overflow-hidden group cursor-pointer">
                     <img src={item.coverUrl} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
 

@@ -1,0 +1,305 @@
+<template>
+  <view class="container">
+    <!-- 固定在顶部的导航 -->
+    <view class="nav-bar">
+      <view class="back-btn" @click="goBack">
+        <text class="back-icon">&lt;</text>
+      </view>
+    </view>
+
+    <!-- 视频播放器 (16:9 比例) -->
+    <view class="video-wrapper">
+      <video
+        id="myVideo"
+        class="video-player"
+        :src="detail.playUrl"
+        :poster="detail.coverUrl"
+        autoplay="true"
+        controls="true"
+        object-fit="contain">
+      </video>
+    </view>
+
+    <scroll-view class="content-scroll" scroll-y="true">
+      <view class="detail-section">
+        <!-- 标题 -->
+        <text class="video-title">{{ detail.title }}</text>
+
+        <!-- 数据信息 -->
+        <view class="meta-info">
+          <text class="score-text">{{ detail.score.toString() }}分</text>
+          <text class="meta-text">{{ detail.year }}</text>
+          <text class="meta-text">{{ formatCount(detail.playCount) }}次播放</text>
+        </view>
+
+        <!-- 标签 -->
+        <view class="tag-list">
+          <text class="tag-item" v-for="(tag, index) in detail.tags" :key="index">{{ tag }}</text>
+        </view>
+
+        <!-- 简介 -->
+        <text class="video-desc">{{ detail.desc }}</text>
+
+        <!-- 操作区 -->
+        <view class="action-bar">
+          <view class="action-btn">
+            <text class="action-icon">❤️</text>
+            <text class="action-num">{{ formatCount(detail.likeCount) }}</text>
+          </view>
+          <view class="action-btn">
+            <text class="action-icon">⭐</text>
+            <text class="action-num">收藏</text>
+          </view>
+          <view class="action-btn">
+            <text class="action-icon">⬇️</text>
+            <text class="action-num">下载</text>
+          </view>
+          <view class="action-btn">
+            <text class="action-icon">💬</text>
+            <text class="action-num">{{ formatCount(detail.commentCount) }}</text>
+          </view>
+          <view class="action-btn">
+            <text class="action-icon">🔗</text>
+            <text class="action-num">分享</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 更多推荐 -->
+      <view class="recommend-section">
+        <text class="recommend-header">更多推荐</text>
+        <view class="related-list">
+          <view class="related-item" v-for="(item, index) in related" :key="index" @click="reloadPage(item.id)">
+            <view class="related-cover-wrap">
+              <image class="related-cover" :src="item.coverUrl" mode="aspectFill"></image>
+              <view class="duration-badge"><text class="duration-text">{{ item.duration }}</text></view>
+            </view>
+            <view class="related-info">
+              <text class="related-title">{{ item.title }}</text>
+              <text class="related-meta">{{ formatCount(item.playCount) }}次播放</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</template>
+
+<script setup lang="uts">
+import { videoDetailMockData } from '../../mock/videoDetail.uts'
+import { ref } from 'vue'
+
+const detail = ref(videoDetailMockData.detail)
+const related = ref(videoDetailMockData.related)
+
+const formatCount = (count: number): string => {
+  if (count > 10000) {
+    return (count / 10000).toFixed(1) + 'w';
+  }
+  return count.toString();
+}
+
+const goBack = () => {
+  uni.navigateBack({ delta: 1 })
+}
+
+const reloadPage = (id: string) => {
+  // 模拟重新加载同一页面刷新数据 (实际项目中应替换为重新 fetch)
+  uni.showToast({ title: '加载视频 ' + id, icon: 'none' })
+}
+</script>
+
+<style>
+.container {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  background-color: #121212;
+  height: 100%;
+}
+.nav-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px; /* 留出状态栏高度 */
+  z-index: 100;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 40px 16px 0 16px;
+  background-image: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+  pointer-events: none; /* 让事件穿透到视频上 */
+}
+.back-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background-color: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto; /* 恢复点击事件 */
+}
+.back-icon {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.video-wrapper {
+  width: 100%;
+  height: 211px; /* 以 375px 宽计算约 16:9 */
+  background-color: #000000;
+  z-index: 50;
+}
+.video-player {
+  width: 100%;
+  height: 100%;
+}
+
+.content-scroll {
+  flex: 1;
+  width: 100%;
+}
+.detail-section {
+  padding: 16px;
+}
+.video-title {
+  color: rgba(255,255,255,0.9);
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 28px;
+  margin-bottom: 8px;
+}
+.meta-info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.score-text {
+  color: #00cc33;
+  font-size: 14px;
+  font-weight: bold;
+  margin-right: 12px;
+}
+.meta-text {
+  color: #888888;
+  font-size: 12px;
+  margin-right: 12px;
+}
+
+.tag-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.tag-item {
+  background-color: #1f1f1f;
+  color: #888888;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.video-desc {
+  color: #888888;
+  font-size: 14px;
+  line-height: 22px;
+  lines: 2;
+  text-overflow: ellipsis;
+  margin-bottom: 24px;
+}
+
+.action-bar {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1f1f1f;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+}
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.action-icon {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+.action-num {
+  color: #888888;
+  font-size: 10px;
+}
+
+.recommend-section {
+  padding: 0 16px 24px 16px;
+}
+.recommend-header {
+  color: rgba(255,255,255,0.9);
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.related-list {
+  display: flex;
+  flex-direction: column;
+}
+.related-item {
+  display: flex;
+  flex-direction: row;
+  height: 80px;
+  margin-bottom: 12px;
+}
+.related-cover-wrap {
+  width: 142px; /* 16:9 approx */
+  height: 80px;
+  background-color: #1f1f1f;
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  margin-right: 12px;
+}
+.related-cover {
+  width: 100%;
+  height: 100%;
+}
+.duration-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background-color: rgba(0,0,0,0.7);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.duration-text {
+  color: #ffffff;
+  font-size: 10px;
+}
+.related-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+.related-title {
+  color: rgba(255,255,255,0.9);
+  font-size: 14px;
+  font-weight: bold;
+  lines: 2;
+  text-overflow: ellipsis;
+  line-height: 20px;
+}
+.related-meta {
+  color: #888888;
+  font-size: 12px;
+}
+</style>

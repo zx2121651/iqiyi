@@ -22,3 +22,22 @@
 3:31:34 AM [vite:mock] request invoke /api/vip/recommends
 3:31:34 AM [vite:mock] request invoke /api/vip/privileges
 3:31:34 AM [vite:mock] request invoke /api/vip/recommends
+4:32:52 AM [vite:mock] mock file add /app/iqiyi-react-web/src/mock/videoDetail.ts
+4:33:15 AM [vite] (client) hmr update /src/styles/globals.css, /src/App.tsx
+4:33:25 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/Home.tsx
+4:37:53 AM [vite:mock] request invoke /api/video/detail?id=1
+4:37:53 AM [vite:mock] request invoke /api/video/related
+4:37:53 AM [vite:mock] request invoke /api/video/detail?id=1
+4:37:53 AM [vite:mock] request invoke /api/video/related
+4:42:13 AM [vite:mock] request invoke /api/video/detail?id=1
+4:42:13 AM [vite:mock] request invoke /api/video/related
+4:42:13 AM [vite:mock] request invoke /api/video/detail?id=1
+4:42:13 AM [vite:mock] request invoke /api/video/related
+4:48:10 AM [vite:mock] request invoke /api/video/detail?id=1
+4:48:10 AM [vite:mock] request invoke /api/video/related
+4:48:10 AM [vite:mock] request invoke /api/video/detail?id=1
+4:48:10 AM [vite:mock] request invoke /api/video/related
+4:49:57 AM [vite:mock] request invoke /api/video/detail?id=1
+4:49:57 AM [vite:mock] request invoke /api/video/related
+4:49:57 AM [vite:mock] request invoke /api/video/detail?id=1
+4:49:57 AM [vite:mock] request invoke /api/video/related

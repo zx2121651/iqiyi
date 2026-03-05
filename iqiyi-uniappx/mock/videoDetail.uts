@@ -1,0 +1,45 @@
+export const videoDetailMockData = {
+  detail: {
+    id: "detail1",
+    title: "狂飙：高启强的崛起之路全纪实",
+    playUrl: "https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4", // 占位视频
+    coverUrl: "https://dummyimage.com/800x450/333/fff&text=Video+Cover",
+    score: 9.5,
+    playCount: 15400000,
+    year: "2023",
+    tags: ["悬疑", "犯罪", "高分", "扫黑"],
+    desc: "这是一段关于该视频的详细剧情介绍。讲述了以一线刑警安欣为代表的正义力量，与以高启强为代表的黑恶势力长达二十年的生死较量。",
+    likeCount: 890000,
+    commentCount: 150000
+  },
+  related: [
+    {
+      id: "r1",
+      title: "扫黑风暴：孙红雷张艺兴联手探案",
+      coverUrl: "https://dummyimage.com/300x169/222/fff&text=Related+1",
+      playCount: 5600000,
+      duration: "45:00"
+    },
+    {
+      id: "r2",
+      title: "人民的名义：史上尺度最大反腐剧",
+      coverUrl: "https://dummyimage.com/300x169/333/fff&text=Related+2",
+      playCount: 12000000,
+      duration: "45:30"
+    },
+    {
+      id: "r3",
+      title: "白夜追凶：潘粤明一人分饰两角",
+      coverUrl: "https://dummyimage.com/300x169/444/fff&text=Related+3",
+      playCount: 8800000,
+      duration: "40:15"
+    },
+    {
+      id: "r4",
+      title: "隐秘的角落：张东升带你去爬山",
+      coverUrl: "https://dummyimage.com/300x169/555/fff&text=Related+4",
+      playCount: 9200000,
+      duration: "48:20"
+    }
+  ]
+}

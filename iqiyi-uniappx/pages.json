@@ -31,6 +31,14 @@
         "navigationBarBackgroundColor": "#121212",
         "navigationBarTextStyle": "white"
       }
+    },
+    {
+      "path": "pages/video-detail/video-detail",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#121212"
+      }
     }
   ],
   "globalStyle": {
