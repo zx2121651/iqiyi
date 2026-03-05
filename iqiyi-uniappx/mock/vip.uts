@@ -1,0 +1,40 @@
+export const vipMockData = {
+  privileges: [
+    { icon: '🎬', name: '院线新片', desc: '全网首播' },
+    { icon: '🚫', name: '广告特权', desc: '跳过广告' },
+    { icon: '📺', name: '蓝光1080P', desc: '超清画质' },
+    { icon: '🔊', name: '杜比音效', desc: '影院体验' },
+    { icon: '🎟️', name: '观影券', desc: '每月两张' },
+    { icon: '🎁', name: '专属活动', desc: '周边好礼' },
+  ],
+  recommends: [
+    {
+      id: "vip1",
+      title: "长风渡",
+      coverUrl: "https://dummyimage.com/300x400/1f1f1f/D4AF37&text=VIP+1",
+      score: 8.5,
+      desc: "VIP专享大剧"
+    },
+    {
+      id: "vip2",
+      title: "莲花楼",
+      coverUrl: "https://dummyimage.com/300x400/2f2f2f/D4AF37&text=VIP+2",
+      score: 9.0,
+      desc: "成毅武侠巨制"
+    },
+    {
+      id: "vip3",
+      title: "狂飙",
+      coverUrl: "https://dummyimage.com/300x400/3f3f3f/D4AF37&text=VIP+3",
+      score: 9.5,
+      desc: "全员飙戏高能不断"
+    },
+    {
+      id: "vip4",
+      title: "三体",
+      coverUrl: "https://dummyimage.com/300x400/4f4f4f/D4AF37&text=VIP+4",
+      score: 8.9,
+      desc: "硬核科幻史诗"
+    }
+  ]
+}

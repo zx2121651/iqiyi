@@ -1,13 +1,97 @@
 <template>
-  <view class="container">
-    <text class="title">会员专区</text>
-    <text class="subtitle">尊享特权内容 (待开发)</text>
-  </view>
+  <scroll-view class="container" :scroll-y="true">
+    <!-- 顶部标题栏 -->
+    <view class="header-nav">
+      <text class="header-title">👑 会员中心</text>
+    </view>
+
+    <view class="content-wrapper">
+      <!-- 会员开通卡片 -->
+      <view class="vip-card">
+        <view class="vip-card-glow"></view>
+
+        <view class="vip-card-top">
+          <view class="vip-title-box">
+            <text class="vip-title-text">VIP 黄金会员</text>
+            <text class="vip-subtitle">未开通 | 预计为你节省 ¥1200</text>
+          </view>
+        </view>
+
+        <view class="price-options">
+          <view class="price-box active-price">
+            <view class="tag-badge"><text class="tag-text">限时特惠</text></view>
+            <text class="old-price">¥258</text>
+            <view class="current-price-row">
+              <text class="symbol">¥</text>
+              <text class="price">148</text>
+              <text class="unit">/年</text>
+            </view>
+          </view>
+
+          <view class="price-box normal-price">
+            <text class="old-price" style="text-decoration-line: none;">连续包季</text>
+            <view class="current-price-row">
+              <text class="symbol">¥</text>
+              <text class="price" style="font-size: 20px;">45</text>
+              <text class="unit">/季</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="pay-btn">
+          <text class="pay-btn-text">确认协议并支付 ></text>
+        </view>
+      </view>
+
+      <!-- 专属特权金刚区 -->
+      <view class="privilege-section">
+        <view class="section-header">
+          <text class="section-title">VIP 专属特权 <text class="section-subtitle">共40+项特权</text></text>
+          <text class="section-more">全部 ></text>
+        </view>
+
+        <view class="privilege-grid">
+          <view class="privilege-item" v-for="(item, index) in privileges" :key="index">
+            <view class="icon-circle">
+              <text class="icon-text">{{ item.icon }}</text>
+            </view>
+            <text class="privilege-name">{{ item.name }}</text>
+            <text class="privilege-desc">{{ item.desc }}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- VIP 专享影视流 -->
+      <view class="recommend-section">
+        <text class="recommend-title">为你推荐 <text class="recommend-tag">尊贵之选</text></text>
+
+        <view class="video-grid">
+          <view class="video-card" v-for="(item, index) in recommends" :key="index">
+            <view class="card-cover-wrap">
+              <image class="card-cover" :src="item.coverUrl" mode="aspectFill"></image>
+              <!-- VIP 金色标识 -->
+              <view class="vip-tag"><text class="vip-text">VIP</text></view>
+              <!-- 评分 -->
+              <view class="card-bottom-info">
+                <text class="score-text">{{ item.score.toString() }}</text>
+              </view>
+            </view>
+            <text class="card-title">{{ item.title }}</text>
+            <text class="card-desc">{{ item.desc }}</text>
+          </view>
+        </view>
+      </view>
+
+    </view>
+  </scroll-view>
 </template>
 
 <script setup lang="uts">
-// 会员页逻辑
-console.log('会员页加载完成')
+import { vipMockData } from '../../mock/vip.uts'
+import { ref } from 'vue'
+
+const privileges = ref(vipMockData.privileges)
+const recommends = ref(vipMockData.recommends)
 </script>
 
 <style>
@@ -15,18 +99,316 @@ console.log('会员页加载完成')
   display: flex;
   flex: 1;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   background-color: #121212;
   height: 100%;
 }
-.title {
+.header-nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 16px 16px 16px;
+  background-color: transparent;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.header-title {
+  color: #e8c081;
+  font-size: 20px;
+  font-weight: bold;
+}
+.content-wrapper {
+  padding: 0 16px 80px 16px;
+}
+
+/* 会员开通卡片 */
+.vip-card {
+  width: 100%;
+  background-image: linear-gradient(to bottom right, #1f1a14, #3a280c);
+  border-width: 1px;
+  border-color: #593d14;
+  border-style: solid;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.vip-card-glow {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 120px;
+  height: 120px;
+  background-color: rgba(232, 192, 129, 0.1);
+  border-radius: 60px;
+}
+.vip-card-top {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+.vip-title-box {
+  display: flex;
+  flex-direction: column;
+}
+.vip-title-text {
+  color: #e8c081;
   font-size: 24px;
   font-weight: bold;
-  color: #D4AF37;
+  font-style: italic;
+  letter-spacing: 2px;
+}
+.vip-subtitle {
+  color: #a3793e;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* 价格选项区 */
+.price-options {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 24px;
+}
+.price-box {
+  flex: 1;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.active-price {
+  background-color: rgba(0,0,0,0.3);
+  border-width: 1px;
+  border-color: rgba(232,192,129,0.3);
+  border-style: solid;
+  margin-right: 12px;
+}
+.normal-price {
+  background-color: rgba(0,0,0,0.2);
+  border-width: 1px;
+  border-color: rgba(232,192,129,0.1);
+  border-style: solid;
+  opacity: 0.8;
+}
+.tag-badge {
+  position: absolute;
+  top: -8px;
+  background-color: #ff3b30;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.tag-text {
+  color: #ffffff;
+  font-size: 10px;
+}
+.old-price {
+  color: #a3793e;
+  font-size: 12px;
+  text-decoration-line: line-through;
+  margin-top: 4px;
+}
+.current-price-row {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  margin-top: 4px;
+}
+.symbol {
+  color: #e8c081;
+  font-size: 14px;
+  font-weight: bold;
+}
+.price {
+  color: #e8c081;
+  font-size: 24px;
+  font-weight: bold;
+  margin-left: 2px;
+}
+.unit {
+  color: #e8c081;
+  font-size: 12px;
+}
+
+/* 支付按钮 */
+.pay-btn {
+  width: 100%;
+  background-image: linear-gradient(to right, #e8c081, #c29653);
+  padding: 12px 0;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+.pay-btn-text {
+  color: #3a280c;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* 专属特权金刚区 */
+.privilege-section {
+  background-color: #1f1f1f;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.section-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 16px;
 }
-.subtitle {
+.section-title {
+  color: #e8c081;
+  font-size: 14px;
+  font-weight: bold;
+}
+.section-subtitle {
+  color: #a3793e;
+  font-size: 12px;
+  font-weight: normal;
+  margin-left: 8px;
+}
+.section-more {
   color: #888888;
+  font-size: 12px;
+}
+.privilege-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.privilege-item {
+  width: 33.33%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.icon-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background-color: rgba(0,0,0,0.4);
+  border-width: 1px;
+  border-color: rgba(232,192,129,0.2);
+  border-style: solid;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.icon-text {
+  font-size: 20px;
+}
+.privilege-name {
+  color: #e8c081;
+  font-size: 12px;
+  font-weight: bold;
+}
+.privilege-desc {
+  color: #888888;
+  font-size: 10px;
+  margin-top: 2px;
+}
+
+/* 推荐流 */
+.recommend-title {
+  color: #e8c081;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.recommend-tag {
+  background-color: rgba(58, 40, 12, 0.5);
+  color: #a3793e;
+  font-size: 12px;
+  font-weight: normal;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+}
+
+.video-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+.video-card {
+  width: 48%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+.card-cover-wrap {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #1f1f1f;
+}
+.card-cover {
+  width: 100%;
+  height: 100%;
+}
+.vip-tag {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #e8c081;
+  padding: 2px 6px;
+  border-bottom-left-radius: 8px;
+}
+.vip-text {
+  color: #3a280c;
+  font-size: 10px;
+  font-weight: bold;
+}
+.card-bottom-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background-image: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  padding: 6px;
+}
+.score-text {
+  color: #e8c081;
+  font-size: 12px;
+  font-weight: bold;
+}
+.card-title {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 4px;
+  lines: 1;
+  text-overflow: ellipsis;
+}
+.card-desc {
+  color: #a3793e;
+  font-size: 12px;
+  margin-top: 2px;
+  lines: 1;
+  text-overflow: ellipsis;
 }
 </style>

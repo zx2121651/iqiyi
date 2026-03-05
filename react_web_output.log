@@ -16,3 +16,9 @@
 10:07:50 PM [vite] (client) hmr update /src/styles/globals.css, /src/pages/Profile.tsx
 10:10:30 PM [vite:mock] request invoke /api/short-video/list
 10:10:30 PM [vite:mock] request invoke /api/short-video/list
+3:28:15 AM [vite:mock] mock file add /app/iqiyi-react-web/src/mock/vip.ts
+3:28:35 AM [vite] (client) hmr update /src/styles/globals.css, /src/pages/VIP.tsx
+3:31:34 AM [vite:mock] request invoke /api/vip/privileges
+3:31:34 AM [vite:mock] request invoke /api/vip/recommends
+3:31:34 AM [vite:mock] request invoke /api/vip/privileges
+3:31:34 AM [vite:mock] request invoke /api/vip/recommends
