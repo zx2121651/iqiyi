@@ -19,11 +19,16 @@ interface ShortVideoData {
  * 使用 CSS Scroll Snap 实现全屏上下滑动切换短视频
  */
 export const ShortVideo = () => {
+  // 定义状态：短视频列表、加载状态、当前正在播放的视频索引
   const [videos, setVideos] = useState<ShortVideoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
+  // 滚动容器的引用，用于计算当前可见的视频
   const containerRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * 初始化加载短视频列表数据
+   */
   useEffect(() => {
     const fetchVideos = async () => {
       try {
@@ -31,7 +36,7 @@ export const ShortVideo = () => {
         const res = await request.get<any, ShortVideoData[]>('/short-video/list');
         setVideos(res);
       } catch (error) {
-        console.error('Failed to load short videos:', error);
+        console.error('获取短视频列表失败:', error);
       } finally {
         setLoading(false);
       }
@@ -39,11 +44,18 @@ export const ShortVideo = () => {
     fetchVideos();
   }, []);
 
+  /**
+   * 格式化数量显示（过万转换）
+   */
   const formatCount = (count: number) => {
     if (count > 10000) return (count / 10000).toFixed(1) + 'w';
     return count.toString();
   };
 
+  /**
+   * 处理点赞逻辑
+   * 找到对应 id 的视频，切换 isLiked 状态并增减点赞数
+   */
   const handleLike = (id: string) => {
     setVideos(videos.map(v =>
       v.id === id
@@ -52,9 +64,15 @@ export const ShortVideo = () => {
     ));
   };
 
+  /**
+   * 监听容器的滚动事件
+   * 通过计算 scrollTop 和视口高度 clientHeight 的比值，
+   * 得出当前吸附显示在视口中央的视频索引，并更新 activeIndex 触发播放/暂停
+   */
   const handleScroll = () => {
     if (!containerRef.current) return;
     const { scrollTop, clientHeight } = containerRef.current;
+    // 四舍五入计算当前索引
     const index = Math.round(scrollTop / clientHeight);
     if (index !== activeIndex) {
       setActiveIndex(index);

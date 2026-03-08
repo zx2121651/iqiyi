@@ -16,11 +16,19 @@ interface VipVideo {
   desc: string;
 }
 
+/**
+ * VIP 会员中心页面组件
+ * 展示会员开通信息、专属特权、及 VIP 推荐影视
+ */
 export const VIP = () => {
+  // 定义状态：会员特权列表、VIP推荐影视列表、加载状态
   const [privileges, setPrivileges] = useState<Privilege[]>([]);
   const [recommends, setRecommends] = useState<VipVideo[]>([]);
   const [loading, setLoading] = useState(true);
 
+  /**
+   * 并发请求加载 VIP 页面所需的基础数据（特权信息和推荐影视）
+   */
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -32,7 +40,7 @@ export const VIP = () => {
         setPrivileges(privData);
         setRecommends(recData);
       } catch (error) {
-        console.error('Failed to load VIP data:', error);
+        console.error('获取VIP数据失败:', error);
       } finally {
         setLoading(false);
       }

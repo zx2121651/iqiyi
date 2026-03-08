@@ -21,8 +21,13 @@ interface Video {
   desc: string;
 }
 
+/**
+ * 首页组件
+ * 包含：顶部导航、轮播图、金刚区分类、继续观看、重磅热播横向列表、特色排版专区、热门推荐瀑布流
+ */
 export const Home = () => {
   const navigate = useNavigate();
+  // 定义状态：轮播图数据、视频列表数据、加载状态、当前激活的分类Tab、下拉刷新状态、上拉加载状态
   const [banners, setBanners] = useState<Banner[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,10 +35,17 @@ export const Home = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
+  // 顶部导航分类列表
   const tabs = ['推荐', '电视剧', '电影', '综艺'];
+  // framer-motion 用于控制下拉刷新时的位移动画
   const controls = useAnimation();
+  // 容器引用，用于监听滚动事件以实现触底加载
   const containerRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * 加载首页数据
+   * 并发请求轮播图和视频列表，使用 mock 数据
+   */
   const loadHomeData = async () => {
     try {
       setLoading(true);
@@ -41,7 +53,7 @@ export const Home = () => {
         request.get<any, Banner[]>('/home/banners'),
         request.get<any, Video[]>('/home/videos'),
       ]);
-      // 模拟根据Tab切换打乱数据
+      // 模拟根据不同的 Tab 切换打乱数据展示顺序
       setBanners(bannerData.sort(() => Math.random() - 0.5));
       setVideos(videoData.sort(() => Math.random() - 0.5));
     } catch (error) {
@@ -51,28 +63,43 @@ export const Home = () => {
     }
   };
 
+  // 当 activeTab 改变时，重新拉取/刷新数据
   useEffect(() => {
     loadHomeData();
   }, [activeTab]);
 
+  /**
+   * 处理手动下拉刷新逻辑
+   * 触发 framer-motion 动画展示刷新中，并模拟延迟
+   */
   const handleRefresh = async () => {
     setIsRefreshing(true);
+    // 向下移动 50px 模拟下拉效果
     await controls.start({ y: 50 });
+    // 模拟网络延迟 1 秒
     await new Promise(resolve => setTimeout(resolve, 1000));
+    // 打乱数据模拟刷新
     setBanners(prev => [...prev].sort(() => Math.random() - 0.5));
     setVideos(prev => [...prev].sort(() => Math.random() - 0.5));
+    // 恢复原位
     await controls.start({ y: 0 });
     setIsRefreshing(false);
   };
 
+  /**
+   * 监听容器滚动事件
+   * 用于实现触底自动加载更多数据
+   */
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+
+    // 如果滚动到顶部且没有在刷新，可以扩展为原生的下拉刷新触发（此处为了简化，在界面上提供了点击刷新代替）
     if (scrollTop === 0 && !isRefreshing) {
       // 触顶下拉 (由于我们没有原生的touch事件监听，这里简单用点击顶部区域代替下拉刷新演示，
       // 或者依赖特定的拉拽库。为简化原生模拟，我们在顶部增加一个明显的刷新按钮/提示框区域)
     }
 
-    // 触底加载更多
+    // 触底加载更多：当距离底部不足 50px 且没有正在加载或刷新时，触发加载更多
     if (scrollHeight - scrollTop <= clientHeight + 50 && !isLoadingMore && !loading) {
       loadMoreData();
     }
@@ -86,15 +113,27 @@ export const Home = () => {
     { name: '音乐', icon: <Music size={24} className="text-pink-400" />, bg: 'bg-pink-500/20' },
   ];
 
+  /**
+   * 加载更多数据逻辑 (模拟)
+   * 延迟 1 秒后，复制已有的部分数据作为新数据追加到底部
+   */
   const loadMoreData = async () => {
     setIsLoadingMore(true);
     await new Promise(resolve => setTimeout(resolve, 1000));
-    const moreVideos = videos.slice(0, 4).map(v => ({ ...v, id: v.id + '_more_' + Date.now(), title: v.title + ' (新)' }));
+    const moreVideos = videos.slice(0, 4).map(v => ({
+      ...v,
+      id: v.id + '_more_' + Date.now(),
+      title: v.title + ' (新)'
+    }));
     setVideos(prev => [...prev, ...moreVideos]);
     setIsLoadingMore(false);
   };
 
-  // 格式化播放量
+  /**
+   * 格式化播放量数字
+   * @param count 播放量数值
+   * @returns 转换后带单位的字符串 (如 1.5w)
+   */
   const formatCount = (count: number) => {
     if (count > 10000) return (count / 10000).toFixed(1) + 'w';
     return count.toString();

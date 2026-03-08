@@ -71,27 +71,36 @@
 import { shortVideoMockData } from '../../mock/shortVideo.uts'
 import { ref } from 'vue'
 
+// 短视频列表数据和当前活动索引
 const videos = ref(shortVideoMockData.list)
 const currentIndex = ref(0)
 
+/**
+ * 监听 swiper 垂直滑动切换事件
+ * 控制上一个视频暂停，当前视频播放，以优化性能
+ * @param e 事件对象，包含 detail.current
+ */
 const onSwiperChange = (e: any) => {
   const prevIndex = currentIndex.value
   currentIndex.value = e.detail.current
   console.log('滑动到了视频索引:', currentIndex.value)
 
-  // 暂停上一个
+  // 获取上一个视频上下文并暂停播放
   const prevVideoContext = uni.createVideoContext('video_' + prevIndex)
   if(prevVideoContext) {
      prevVideoContext.pause()
   }
 
-  // 播放当前
+  // 获取当前可视视频上下文并开始播放
   const currentVideoContext = uni.createVideoContext('video_' + currentIndex.value)
   if(currentVideoContext) {
      currentVideoContext.play()
   }
 }
 
+/**
+ * 格式化数值显示，超过 10000 转换为 w 单位
+ */
 const formatCount = (count: number): string => {
   if (count > 10000) {
     return (count / 10000).toFixed(1) + 'w';
@@ -99,6 +108,11 @@ const formatCount = (count: number): string => {
   return count.toString();
 }
 
+/**
+ * 处理点赞操作
+ * 切换点赞状态，并实时增减数据
+ * @param item 当前操作的视频对象
+ */
 const handleLike = (item: any) => {
   item.isLiked = !item.isLiked
   if (item.isLiked) {

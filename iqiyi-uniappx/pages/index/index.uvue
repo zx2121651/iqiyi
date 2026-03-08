@@ -132,12 +132,14 @@
 import { homeMockData } from '../../mock/home.uts'
 import { ref } from 'vue'
 
-const banners = ref(homeMockData.banners)
-const videos = ref(homeMockData.videos)
-const isRefreshing = ref(false)
-const isLoadingMore = ref(false)
-const activeCardIndex = ref(-1)
+// 首页状态定义
+const banners = ref(homeMockData.banners) // 轮播图数据
+const videos = ref(homeMockData.videos)   // 视频列表数据
+const isRefreshing = ref(false)           // 下拉刷新状态
+const isLoadingMore = ref(false)          // 上拉加载更多状态
+const activeCardIndex = ref(-1)           // 当前按压（按住）的视频卡片索引，用于模拟触感反馈微动画
 
+// 分类金刚区静态数据
 const kingKongList = [
   { name: 'VIP专区', icon: '👑', bgColor: '#3a280c', iconColor: '#e8c081' },
   { name: '动漫', icon: '✨', bgColor: 'rgba(168, 85, 247, 0.2)', iconColor: '#c084fc' },
@@ -146,33 +148,52 @@ const kingKongList = [
   { name: '音乐', icon: '🎵', bgColor: 'rgba(236, 72, 153, 0.2)', iconColor: '#f472b6' }
 ]
 
+// 顶部频道 Tab
 const tabs = ['推荐', '电视剧', '电影', '综艺']
 const activeTab = ref('推荐')
 
+/**
+ * 点击金刚区分类
+ */
 const clickKingKong = (name: string) => {
   uni.showToast({ title: '点击分类: ' + name, icon: 'none' })
 }
 
+/**
+ * 切换顶部 Tab
+ * @param tab 选中的频道名
+ */
 const switchTab = (tab: string) => {
   if (activeTab.value === tab) return
   activeTab.value = tab
-  // 模拟请求新数据
+  // 模拟网络请求加载不同频道的数据
   uni.showLoading({ title: '加载中' })
   setTimeout(() => {
+    // 打乱顺序模拟新数据
     banners.value = [...homeMockData.banners].sort(() => Math.random() - 0.5)
     videos.value = [...homeMockData.videos].sort(() => Math.random() - 0.5)
     uni.hideLoading()
   }, 500)
 }
 
+/**
+ * 触摸视频卡片开始事件：记录被按压卡片的索引
+ */
 const onTouchStart = (index: number) => {
   activeCardIndex.value = index
 }
 
+/**
+ * 触摸视频卡片结束或取消事件：重置按压状态
+ */
 const onTouchEnd = (index: number) => {
   activeCardIndex.value = -1
 }
 
+/**
+ * 获取卡片按压反馈样式
+ * 配合 @touchstart / @touchend 实现手势微缩放效果
+ */
 const getCardStyle = (index: number): string => {
   if (activeCardIndex.value === index) {
     return 'transform: scale(0.95); transition: transform 0.2s;'
@@ -180,7 +201,9 @@ const getCardStyle = (index: number): string => {
   return 'transform: scale(1); transition: transform 0.2s;'
 }
 
-// 格式化播放量
+/**
+ * 格式化播放量数字 (如：超过万转为 'x.xw')
+ */
 const formatCount = (count: number): string => {
   if (count > 10000) {
     return (count / 10000).toFixed(1) + 'w';
@@ -188,35 +211,49 @@ const formatCount = (count: number): string => {
   return count.toString();
 }
 
+/**
+ * 跳转至视频详情页
+ */
 const goToDetail = (id: string) => {
   uni.navigateTo({
     url: '/pages/video-detail/video-detail?id=' + id
   })
 }
 
+/**
+ * 跳转至搜索页
+ */
 const goToSearch = () => {
   uni.navigateTo({
     url: '/pages/search/search'
   })
 }
 
-// 下拉刷新
+/**
+ * 原生下拉刷新逻辑
+ * 触发 scroll-view 的 @refresherrefresh 事件
+ */
 const onRefresh = () => {
   isRefreshing.value = true
+  // 模拟请求延迟
   setTimeout(() => {
-    // 模拟刷新数据，将现有数据打乱
+    // 打乱数据模拟刷新
     videos.value = [...homeMockData.videos].sort(() => Math.random() - 0.5)
     isRefreshing.value = false
     uni.showToast({ title: '刷新成功', icon: 'none' })
   }, 1000)
 }
 
-// 上拉加载更多
+/**
+ * 原生上拉加载更多逻辑
+ * 触发 scroll-view 的 @scrolltolower 事件
+ */
 const onLoadMore = () => {
   if (isLoadingMore.value) return
   isLoadingMore.value = true
+  // 模拟请求延迟
   setTimeout(() => {
-    // 模拟追加数据
+    // 模拟追加新分页数据
     const moreVideos = homeMockData.videos.map(v => ({
       ...v,
       id: v.id + '_more_' + Date.now(),

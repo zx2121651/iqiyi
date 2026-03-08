@@ -113,15 +113,18 @@
 import { videoDetailMockData } from '../../mock/videoDetail.uts'
 import { ref } from 'vue'
 
+// 视频详情与相关推荐数据源
 const detail = ref(videoDetailMockData.detail)
 const related = ref(videoDetailMockData.related)
 
+// 模拟的评论列表
 const comments = ref([
   { id: 1, user: '用户A', avatar: 'https://dummyimage.com/100x100/333/fff&text=A', content: '这个视频拍得太好了！', time: '2小时前' },
   { id: 2, user: '用户B', avatar: 'https://dummyimage.com/100x100/444/fff&text=B', content: '剧情很紧凑，推荐大家看。', time: '5小时前' },
   { id: 3, user: '用户C', avatar: 'https://dummyimage.com/100x100/555/fff&text=C', content: '绝了绝了，一口气看完！', time: '1天前' },
 ])
 
+// 模拟内置弹幕列表数据，供原生 video 组件解析播放
 const danmuList = ref([
   { text: '前方高能', color: '#ff0000', time: 2 },
   { text: '绝了', color: '#ffffff', time: 4 },
@@ -130,6 +133,10 @@ const danmuList = ref([
   { text: '来了来了', color: '#ffffff', time: 1 },
 ])
 
+/**
+ * 格式化播放量和评论数
+ * 大于一万显示 'w'，否则显示具体数值
+ */
 const formatCount = (count: number): string => {
   if (count > 10000) {
     return (count / 10000).toFixed(1) + 'w';
@@ -137,12 +144,19 @@ const formatCount = (count: number): string => {
   return count.toString();
 }
 
+/**
+ * 原生返回上一页
+ */
 const goBack = () => {
   uni.navigateBack({ delta: 1 })
 }
 
+/**
+ * 点击相关推荐时重新加载页面数据
+ * @param id 要跳转的新视频 ID
+ */
 const reloadPage = (id: string) => {
-  // 模拟重新加载同一页面刷新数据 (实际项目中应替换为重新 fetch)
+  // 模拟重新加载同一页面刷新数据 (实际项目中应替换为重新发起网络请求)
   uni.showToast({ title: '加载视频 ' + id, icon: 'none' })
 }
 </script>
