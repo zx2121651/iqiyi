@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Settings, Clock, Star, Download, Heart, Crown, ChevronRight } from 'lucide-react';
+import { Settings, Clock, Star, Download, Heart, Crown, ChevronRight, History, Bell, MessageSquare } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 
 /**
@@ -91,6 +91,30 @@ export const Profile = () => {
             <span className="text-sm font-medium">关于我们</span>
             <ChevronRight size={16} className="text-gray-500" />
           </div>
+        </div>
+
+        <div className="bg-[#1a1a1a] rounded-xl overflow-hidden mt-6 mb-8">
+          {[
+            { icon: <History size={22} className="text-gray-400" />, title: '观看历史' },
+            { icon: <Star size={22} className="text-gray-400" />, title: '我的收藏' },
+            { icon: <Download size={22} className="text-gray-400" />, title: '离线缓存' },
+            { icon: <Bell size={22} className="text-gray-400" />, title: '消息通知' },
+            { icon: <MessageSquare size={22} className="text-gray-400" />, title: '帮助与反馈' },
+            { icon: <Settings size={22} className="text-gray-400" />, title: '系统设置' },
+          ].map((item, index) => (
+            <div
+              key={item.title}
+              className={`flex items-center justify-between p-4 bg-[#222222] active:bg-[#333333] transition-colors cursor-pointer ${
+                index !== 5 ? 'border-b border-gray-800' : ''
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                {item.icon}
+                <span className="text-white text-[15px]">{item.title}</span>
+              </div>
+              <ChevronRight size={20} className="text-gray-500" />
+            </div>
+          ))}
         </div>
 
         {/* 退出登录按钮 */}

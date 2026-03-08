@@ -62,6 +62,17 @@
     </view>
 
     <!-- 退出登录按钮 (仅登录后可见) -->
+    <!-- 功能列表区 -->
+    <view class="feature-list" v-if="authStore.isLoggedIn">
+      <view class="list-item" v-for="(item, index) in featureList" :key="index" @click="handleItemClick(item)">
+        <view class="item-left">
+          <text class="item-icon">{{item.icon}}</text>
+          <text class="item-text">{{item.title}}</text>
+        </view>
+        <text class="item-arrow">&gt;</text>
+      </view>
+    </view>
+
     <button class="logout-btn" v-if="authStore.isLoggedIn" @click="handleLogout">
       <text class="logout-text">退出登录</text>
     </button>
@@ -111,6 +122,19 @@ const handleMenuClick = (label: string) => {
 /**
  * 退出登录逻辑
  */
+const featureList = [
+  { title: '观看历史', icon: '🕒' },
+  { title: '我的收藏', icon: '⭐' },
+  { title: '离线缓存', icon: '⬇️' },
+  { title: '消息通知', icon: '🔔' },
+  { title: '帮助与反馈', icon: '💬' },
+  { title: '系统设置', icon: '⚙️' }
+]
+
+const handleItemClick = (item: Record<string, string>) => {
+  uni.showToast({ title: `点击了${item['title']}`, icon: 'none' })
+}
+
 const handleLogout = () => {
   uni.showModal({
     title: '提示',
@@ -330,6 +354,42 @@ const handleLogout = () => {
 
 .list-arrow {
   color: #888888;
+  font-size: 16px;
+}
+
+.feature-list {
+  background-color: #222222;
+  border-radius: 12px;
+  margin: 24px 16px 0 16px;
+  overflow: hidden;
+}
+.list-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom-width: 1px;
+  border-bottom-color: #333333;
+}
+.list-item:active {
+  background-color: #333333;
+}
+.item-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.item-icon {
+  font-size: 20px;
+  margin-right: 12px;
+}
+.item-text {
+  color: #ffffff;
+  font-size: 15px;
+}
+.item-arrow {
+  color: #666666;
   font-size: 16px;
 }
 
