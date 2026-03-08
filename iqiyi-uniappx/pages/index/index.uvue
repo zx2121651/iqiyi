@@ -138,6 +138,7 @@ const videos = ref(homeMockData.videos)   // 视频列表数据
 const isRefreshing = ref(false)           // 下拉刷新状态
 const isLoadingMore = ref(false)          // 上拉加载更多状态
 const activeCardIndex = ref(-1)           // 当前按压（按住）的视频卡片索引，用于模拟触感反馈微动画
+const page = ref(1)                       // 列表当前页码
 
 // 分类金刚区静态数据
 const kingKongList = [
@@ -166,6 +167,7 @@ const clickKingKong = (name: string) => {
 const switchTab = (tab: string) => {
   if (activeTab.value === tab) return
   activeTab.value = tab
+  page.value = 1 // 重置分页
   // 模拟网络请求加载不同频道的数据
   uni.showLoading({ title: '加载中' })
   setTimeout(() => {
@@ -235,6 +237,7 @@ const goToSearch = () => {
  */
 const onRefresh = () => {
   isRefreshing.value = true
+  page.value = 1 // 重置分页
   // 模拟请求延迟
   setTimeout(() => {
     // 打乱数据模拟刷新
@@ -245,21 +248,26 @@ const onRefresh = () => {
 }
 
 /**
- * 原生上拉加载更多逻辑
+ * 原生上拉加载更多逻辑 (真实分页模拟)
  * 触发 scroll-view 的 @scrolltolower 事件
  */
 const onLoadMore = () => {
   if (isLoadingMore.value) return
   isLoadingMore.value = true
+
   // 模拟请求延迟
   setTimeout(() => {
-    // 模拟追加新分页数据
-    const moreVideos = homeMockData.videos.map(v => ({
+    const nextPage = page.value + 1
+    // 模拟生成分页标记的新数据，而不是单纯复制
+    const moreVideos = homeMockData.videos.slice(0, 4).map(v => ({
       ...v,
-      id: v.id + '_more_' + Date.now(),
-      title: v.title + ' (新)'
+      id: v.id + '_page_' + nextPage + '_' + Date.now(),
+      title: v.title.replace(/\(新第\d+页\)$/, '') + ' (新第' + nextPage + '页)',
+      playCount: Math.floor(Math.random() * 50000)
     }))
+
     videos.value.push(...moreVideos)
+    page.value = nextPage
     isLoadingMore.value = false
   }, 1000)
 }

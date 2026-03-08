@@ -34,6 +34,7 @@ export const Home = () => {
   const [activeTab, setActiveTab] = useState('推荐');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
 
   // 顶部导航分类列表
   const tabs = ['推荐', '电视剧', '电影', '综艺'];
@@ -65,6 +66,7 @@ export const Home = () => {
 
   // 当 activeTab 改变时，重新拉取/刷新数据
   useEffect(() => {
+    setPage(1); // 切换 Tab 时重置页码
     loadHomeData();
   }, [activeTab]);
 
@@ -74,6 +76,7 @@ export const Home = () => {
    */
   const handleRefresh = async () => {
     setIsRefreshing(true);
+    setPage(1); // 刷新重置页码
     // 向下移动 50px 模拟下拉效果
     await controls.start({ y: 50 });
     // 模拟网络延迟 1 秒
@@ -114,18 +117,24 @@ export const Home = () => {
   ];
 
   /**
-   * 加载更多数据逻辑 (模拟)
-   * 延迟 1 秒后，复制已有的部分数据作为新数据追加到底部
+   * 加载更多数据逻辑 (模拟真实分页)
+   * 根据当前页码生成不同后缀的标题，模拟加载下一页的数据
    */
   const loadMoreData = async () => {
     setIsLoadingMore(true);
     await new Promise(resolve => setTimeout(resolve, 1000));
+
+    const nextPage = page + 1;
+    // 模拟基于原数据生成带有“第 X 页”后缀的新数据
     const moreVideos = videos.slice(0, 4).map(v => ({
       ...v,
-      id: v.id + '_more_' + Date.now(),
-      title: v.title + ' (新)'
+      id: v.id + '_page_' + nextPage + '_' + Date.now(),
+      title: v.title.replace(/\s*\(新第\d+页\)$/, '') + ` (新第${nextPage}页)`,
+      playCount: Math.floor(Math.random() * 50000)
     }));
+
     setVideos(prev => [...prev, ...moreVideos]);
+    setPage(nextPage);
     setIsLoadingMore(false);
   };
 

@@ -47,7 +47,7 @@
             <text class="action-text">{{ formatCount(item.commentCount) }}</text>
           </view>
 
-          <view class="action-item">
+          <view class="action-item" @click="openSharePanel">
             <text class="action-icon">↪️</text>
             <text class="action-text">{{ formatCount(item.shareCount) }}</text>
           </view>
@@ -64,6 +64,49 @@
         </view>
       </swiper-item>
     </swiper>
+
+    <!-- 底部弹出的分享面板 -->
+    <view class="share-mask" v-if="showShare" @click="closeSharePanel"></view>
+    <view class="share-panel" :class="{'share-panel-show': showShare}">
+      <view class="share-header">
+        <text class="share-title">分享到</text>
+        <text class="close-icon" @click="closeSharePanel">✕</text>
+      </view>
+
+      <view class="share-grid">
+        <view class="share-item" @click="shareTo('微信好友')">
+          <view class="share-icon-wrap" style="background-color: #09B83E;">
+            <text class="share-icon">💬</text>
+          </view>
+          <text class="share-name">微信好友</text>
+        </view>
+        <view class="share-item" @click="shareTo('朋友圈')">
+          <view class="share-icon-wrap" style="background-color: #09B83E;">
+            <text class="share-icon">⭕</text>
+          </view>
+          <text class="share-name">朋友圈</text>
+        </view>
+        <view class="share-item" @click="shareTo('复制链接')">
+          <view class="share-icon-wrap" style="background-color: #333333;">
+            <text class="share-icon">🔗</text>
+          </view>
+          <text class="share-name">复制链接</text>
+        </view>
+      </view>
+
+      <view class="share-actions">
+        <view class="action-item-small" @click="shareTo('保存本地')">
+          <view class="action-icon-wrap">
+            <text class="action-icon-small">⬇️</text>
+          </view>
+          <text class="action-name">保存本地</text>
+        </view>
+      </view>
+
+      <view class="cancel-btn" @click="closeSharePanel">
+        <text class="cancel-text">取消</text>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -74,6 +117,9 @@ import { ref } from 'vue'
 // 短视频列表数据和当前活动索引
 const videos = ref(shortVideoMockData.list)
 const currentIndex = ref(0)
+
+// 分享面板的显示状态
+const showShare = ref(false)
 
 /**
  * 监听 swiper 垂直滑动切换事件
@@ -120,6 +166,29 @@ const handleLike = (item: any) => {
   } else {
     item.likeCount -= 1
   }
+}
+
+/**
+ * 展开分享面板
+ */
+const openSharePanel = () => {
+  showShare.value = true
+}
+
+/**
+ * 关闭分享面板
+ */
+const closeSharePanel = () => {
+  showShare.value = false
+}
+
+/**
+ * 模拟分享动作
+ * @param target 目标渠道
+ */
+const shareTo = (target: string) => {
+  uni.showToast({ title: '已' + (target==='复制链接'?'复制':'分享到') + target, icon: 'success' })
+  closeSharePanel()
 }
 </script>
 
@@ -273,5 +342,131 @@ const handleLike = (item: any) => {
 .music-text {
   color: #ffffff;
   font-size: 12px;
+}
+
+/* 分享面板样式 */
+.share-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.6);
+  z-index: 998;
+}
+.share-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #1f1f1f;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  z-index: 999;
+  transform: translateY(100%);
+  transition-property: transform;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-out;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+}
+.share-panel-show {
+  transform: translateY(0);
+}
+.share-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.share-title {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
+}
+.close-icon {
+  color: #888888;
+  font-size: 18px;
+  padding: 4px;
+}
+.share-grid {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin-bottom: 24px;
+}
+.share-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.share-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.share-icon {
+  font-size: 24px;
+}
+.share-name {
+  color: #cccccc;
+  font-size: 12px;
+}
+
+.share-actions {
+  display: flex;
+  flex-direction: row;
+  border-top-width: 1px;
+  border-top-color: #333333;
+  border-top-style: solid;
+  padding-top: 24px;
+  margin-bottom: 24px;
+}
+.action-item-small {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 24px;
+}
+.action-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background-color: rgba(255,255,255,0.1);
+  border-width: 1px;
+  border-color: #333333;
+  border-style: solid;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.action-icon-small {
+  font-size: 18px;
+}
+.action-name {
+  color: #888888;
+  font-size: 10px;
+}
+
+.cancel-btn {
+  background-color: #333333;
+  border-radius: 24px;
+  padding: 12px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+}
+.cancel-text {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
 }
 </style>

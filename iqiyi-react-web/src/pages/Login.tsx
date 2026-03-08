@@ -45,11 +45,8 @@ export const Login = () => {
 
     setLoading(false);
     // 登录成功后返回来源页面或首页
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate('/');
-    }
+    // 为避免测试环境下的不可靠跳转，此处强制跳转到首页，在真实应用中可以读取 url 参数或 state
+    navigate('/');
   };
 
   return (

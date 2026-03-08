@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import request from '@/utils/request';
-import { ChevronLeft, Share2, Heart, Star, Download, MessageSquare } from 'lucide-react';
+import { ChevronLeft, Share2, Heart, Star, Download, MessageSquare, Send } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 
 interface VideoDetailData {
   id: string;
@@ -70,17 +71,18 @@ export const VideoDetail = () => {
     return count.toString();
   };
 
-  // 如果处于加载中或详情未加载，则显示加载提示
-  if (loading || !detail) {
-    return <div className="flex h-screen w-full items-center justify-center bg-[#121212] text-white">加载中...</div>;
-  }
+  // 引入全局状态，用于获取用户信息以支持发表评论功能
+  const { isLoggedIn, userInfo } = useAuthStore();
 
-  // 模拟评论数据
-  const [comments] = useState([
+  // 模拟评论数据，改为可变状态以便发表新评论
+  const [comments, setComments] = useState([
     { id: 1, user: '用户A', avatar: 'https://dummyimage.com/100x100/333/fff&text=A', content: '这个视频拍得太好了！', time: '2小时前' },
     { id: 2, user: '用户B', avatar: 'https://dummyimage.com/100x100/444/fff&text=B', content: '剧情很紧凑，推荐大家看。', time: '5小时前' },
     { id: 3, user: '用户C', avatar: 'https://dummyimage.com/100x100/555/fff&text=C', content: '绝了绝了，一口气看完！', time: '1天前' },
   ]);
+
+  // 评论输入框的值
+  const [commentText, setCommentText] = useState('');
 
   // 模拟弹幕数据源
   const [danmakuList] = useState([
@@ -95,6 +97,37 @@ export const VideoDetail = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   // 当前正在屏幕上展示的弹幕列表状态
   const [currentDanmaku, setCurrentDanmaku] = useState<{text:string, color:string, top:number, id:number}[]>([]);
+
+  /**
+   * 发表评论逻辑
+   * 未登录跳转到登录页，已登录则组装新评论插入列表顶部
+   */
+  const handlePostComment = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!isLoggedIn || !userInfo) {
+      alert('请先登录后再发表评论');
+      navigate('/login');
+      return;
+    }
+    if (!commentText.trim()) {
+      return;
+    }
+
+    const newComment = {
+      id: Date.now(),
+      user: userInfo.nickname,
+      avatar: userInfo.avatar,
+      content: commentText.trim(),
+      time: '刚刚'
+    };
+
+    // 插入新评论到顶部
+    setComments([newComment, ...comments]);
+    setCommentText('');
+
+    // 同步更新详情的评论数
+    setDetail(prev => prev ? { ...prev, commentCount: prev.commentCount + 1 } : prev);
+  };
 
   /**
    * 简易弹幕逻辑实现
@@ -129,6 +162,11 @@ export const VideoDetail = () => {
     // 卸载组件时清理定时器
     return () => clearInterval(interval);
   }, [danmakuList, loading, detail]);
+
+  // 提前返回必须写在所有 Hooks 之后，以符合 React Hooks 规则
+  if (loading || !detail) {
+    return <div className="flex h-screen w-full items-center justify-center bg-[#121212] text-white">加载中...</div>;
+  }
 
   return (
     <div className="w-full min-h-screen bg-[#121212] text-dark-text pb-6">
@@ -253,7 +291,7 @@ export const VideoDetail = () => {
         </div>
 
         {/* 更多推荐列表 */}
-        <div>
+        <div className="mb-20">
           <h3 className="text-base font-bold mb-3 text-white/90">更多推荐</h3>
           <div className="flex flex-col gap-3">
             {related.map((item) => (
@@ -281,6 +319,38 @@ export const VideoDetail = () => {
           </div>
         </div>
 
+      </div>
+
+      {/* 固定在底部的评论输入区域 */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#1f1f1f] p-3 border-t border-gray-800 flex items-center gap-3 z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.5)]">
+        {isLoggedIn ? (
+          <img src={userInfo?.avatar} alt="avatar" className="w-8 h-8 rounded-full flex-shrink-0 border border-gray-700" />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-gray-700 flex-shrink-0 border border-gray-600 flex items-center justify-center" onClick={() => navigate('/login')}>
+            <span className="text-[10px] text-gray-400">未登录</span>
+          </div>
+        )}
+
+        <form onSubmit={handlePostComment} className="flex-1 flex items-center bg-black/40 rounded-full px-4 py-2 border border-gray-700 focus-within:border-[#00cc33] transition-colors">
+          <input
+            type="text"
+            placeholder={isLoggedIn ? "发条评论友善交流..." : "点击登录后发表评论..."}
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            readOnly={!isLoggedIn}
+            onClick={() => !isLoggedIn && navigate('/login')}
+            onClick={() => { if (!isLoggedIn) navigate('/login'); }}
+            className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder:text-gray-500 disabled:opacity-50"
+          />
+        </form>
+
+        <button
+          onClick={handlePostComment}
+          disabled={!commentText.trim() || !isLoggedIn}
+          className="text-[#00cc33] disabled:text-gray-600 p-2 active:scale-90 transition-transform"
+        >
+          <Send size={20} />
+        </button>
       </div>
     </div>
   );

@@ -90,7 +90,7 @@
       </view>
 
       <!-- 更多推荐 -->
-      <view class="recommend-section">
+      <view class="recommend-section" style="padding-bottom: 80px;">
         <text class="recommend-header">更多推荐</text>
         <view class="related-list">
           <view class="related-item" v-for="(item, index) in related" :key="index" @click="reloadPage(item.id)">
@@ -106,16 +106,50 @@
         </view>
       </view>
     </scroll-view>
+
+    <!-- 底部发表评论操作区 -->
+    <view class="fixed-bottom-comment">
+      <!-- 头像区域 (已登录显示头像，未登录显示占位符) -->
+      <image v-if="authStore.isLoggedIn" class="my-avatar" :src="authStore.userInfo?.avatar || ''" mode="aspectFill"></image>
+      <view v-else class="my-avatar no-avatar" @click="checkLogin">
+        <text class="no-avatar-text">未登录</text>
+      </view>
+
+      <!-- 输入框 -->
+      <view class="input-container" @click="handleInputClick">
+        <input
+          class="comment-input"
+          type="text"
+          v-model="commentText"
+          :placeholder="authStore.isLoggedIn ? '发条评论友善交流...' : '点击登录后发表评论...'"
+          placeholder-class="comment-placeholder"
+          :disabled="!authStore.isLoggedIn"
+          @confirm="submitComment"
+          confirm-type="send"
+        />
+      </view>
+
+      <!-- 发送按钮 -->
+      <view class="send-btn" @click="submitComment">
+        <text class="send-icon" :style="{ color: (!commentText || !authStore.isLoggedIn) ? '#666666' : '#00cc33' }">发送</text>
+      </view>
+    </view>
   </view>
 </template>
 
 <script setup lang="uts">
 import { videoDetailMockData } from '../../mock/videoDetail.uts'
 import { ref } from 'vue'
+import { useAuthStore } from '../../store/auth.uts'
+
+const authStore = useAuthStore()
 
 // 视频详情与相关推荐数据源
 const detail = ref(videoDetailMockData.detail)
 const related = ref(videoDetailMockData.related)
+
+// 新增评论绑定的双向文本
+const commentText = ref('')
 
 // 模拟的评论列表
 const comments = ref([
@@ -158,6 +192,53 @@ const goBack = () => {
 const reloadPage = (id: string) => {
   // 模拟重新加载同一页面刷新数据 (实际项目中应替换为重新发起网络请求)
   uni.showToast({ title: '加载视频 ' + id, icon: 'none' })
+}
+
+/**
+ * 校验登录并跳转
+ */
+const checkLogin = () => {
+  if (!authStore.isLoggedIn) {
+    uni.navigateTo({ url: '/pages/login/login' })
+  }
+}
+
+/**
+ * 提交发表评论
+ */
+
+const handleInputClick = () => {
+  if (!authStore.isLoggedIn) {
+    uni.navigateTo({ url: '/pages/login/login' });
+  }
+};
+
+const submitComment = () => {
+  if (!authStore.isLoggedIn) {
+    uni.showToast({ title: '请先登录', icon: 'none' })
+    uni.navigateTo({ url: '/pages/login/login' })
+    return
+  }
+  if (!commentText.value.trim()) {
+    return
+  }
+
+  // 构造新评论对象
+  const newComment = {
+    id: Date.now(),
+    user: authStore.userInfo?.nickname || '我',
+    avatar: authStore.userInfo?.avatar || 'https://dummyimage.com/100/333/fff',
+    content: commentText.value.trim(),
+    time: '刚刚'
+  }
+
+  // 插到前面
+  comments.value.unshift(newComment)
+  commentText.value = ''
+
+  // 同步更新详情计数
+  detail.value.commentCount += 1
+  uni.showToast({ title: '发表成功', icon: 'success' })
 }
 </script>
 
@@ -415,5 +496,72 @@ const reloadPage = (id: string) => {
 .related-meta {
   color: #888888;
   font-size: 12px;
+}
+
+/* 底部固定评论栏 */
+.fixed-bottom-comment {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background-color: #1f1f1f;
+  border-top-width: 1px;
+  border-top-color: #333333;
+  border-top-style: solid;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 100;
+}
+.my-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  margin-right: 12px;
+}
+.no-avatar {
+  background-color: #333333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-width: 1px;
+  border-color: #555555;
+  border-style: solid;
+}
+.no-avatar-text {
+  color: #888888;
+  font-size: 10px;
+}
+.input-container {
+  flex: 1;
+  height: 36px;
+  background-color: rgba(0,0,0,0.3);
+  border-width: 1px;
+  border-color: #333333;
+  border-style: solid;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 16px;
+}
+.comment-input {
+  flex: 1;
+  color: #ffffff;
+  font-size: 14px;
+  height: 100%;
+  background-color: transparent;
+}
+.comment-placeholder {
+  color: #666666;
+}
+.send-btn {
+  padding: 8px 0 8px 16px;
+}
+.send-icon {
+  font-size: 16px;
+  font-weight: bold;
 }
 </style>
