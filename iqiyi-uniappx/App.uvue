@@ -1,7 +1,12 @@
 <script lang="uts">
+import { useAuthStore } from './store/auth.uts'
+
 export default {
   onLaunch: function() {
     console.log('App Launch')
+    // 应用启动时初始化登录状态
+    const authStore = useAuthStore()
+    authStore.initAuth()
   },
   onShow: function() {
     console.log('App Show')

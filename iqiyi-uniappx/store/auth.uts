@@ -1,20 +1,41 @@
-import { defineStore } from 'pinia';
+import { defineStore } from 'pinia'
+
+export type UserInfo = {
+  id: string
+  nickname: string
+  avatar: string
+  isVip: boolean
+  vipExpireTime?: string
+}
 
 export const useAuthStore = defineStore('auth', {
   state: () => {
     return {
-      isLogin: false,
-      user: null as any | null,
-    };
+      isLoggedIn: false as boolean,
+      userInfo: null as UserInfo | null,
+    }
   },
   actions: {
-    login(user: any) {
-      this.isLogin = true;
-      this.user = user;
+    login(user: UserInfo) {
+      this.isLoggedIn = true
+      this.userInfo = user
+      uni.setStorageSync('auth_user', JSON.stringify(user))
     },
     logout() {
-      this.isLogin = false;
-      this.user = null;
+      this.isLoggedIn = false
+      this.userInfo = null
+      uni.removeStorageSync('auth_user')
     },
-  },
-});
+    initAuth() {
+      const userStr = uni.getStorageSync('auth_user')
+      if (userStr) {
+        try {
+          this.userInfo = JSON.parse(userStr as string) as UserInfo
+          this.isLoggedIn = true
+        } catch (e) {
+          console.error('Failed to parse user info', e)
+        }
+      }
+    }
+  }
+})

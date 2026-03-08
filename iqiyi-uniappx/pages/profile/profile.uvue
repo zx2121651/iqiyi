@@ -1,84 +1,116 @@
 <template>
   <scroll-view class="container" :scroll-y="true">
-    <!-- 顶部透明状态栏和操作区 -->
-    <view class="header-actions">
-      <view class="action-left">
-        <text class="action-icon">⎚</text>
+    <!-- 头部区域，渐变背景 -->
+    <view class="header-section">
+      <view class="header-top">
+        <text class="page-title">我的</text>
+        <text class="settings-icon" @click="goToSettings">⚙️</text>
       </view>
-      <view class="action-right">
-        <text class="action-icon">🔔</text>
-        <text class="action-icon">⚙️</text>
+
+      <!-- 用户信息展示区 (通过 store 判断是否登录) -->
+      <view class="user-info-box" v-if="authStore.isLoggedIn" @click="goToSettings">
+        <image class="avatar" :src="authStore.userInfo?.avatar || 'https://dummyimage.com/100/333/fff'" mode="aspectFill"></image>
+        <view class="info-content">
+          <text class="nickname">{{ authStore.userInfo?.nickname }}</text>
+          <view class="vip-badge" v-if="authStore.userInfo?.isVip">
+            <text class="vip-icon">👑</text>
+            <text class="vip-text">VIP会员 (至 {{ authStore.userInfo?.vipExpireTime }})</text>
+          </view>
+          <text class="normal-user" v-else>普通用户</text>
+        </view>
+      </view>
+
+      <!-- 未登录引导 -->
+      <view class="user-info-box not-logged-in" v-else @click="goToLogin">
+        <view class="avatar default-avatar">
+          <text class="default-avatar-text">未登录</text>
+        </view>
+        <view class="info-content">
+          <text class="login-prompt">点击登录/注册</text>
+          <text class="login-desc">登录后畅享高清画质及多端同步记录</text>
+        </view>
+        <text class="arrow-icon">></text>
       </view>
     </view>
 
-    <view class="content-wrapper">
-      <!-- 用户头部信息区 -->
-      <view class="user-info-section" @click="handleLoginClick">
-        <image class="avatar" :src="authStore.isLogin && authStore.user != null ? authStore.user.avatar : 'https://dummyimage.com/100x100/333/fff&text=Guest'" mode="aspectFill"></image>
-        <view class="user-text-box">
-          <text class="user-name">{{ authStore.isLogin && authStore.user != null ? authStore.user.name : '点击登录/注册' }}</text>
-          <text class="user-id">{{ authStore.isLogin && authStore.user != null ? '爱奇艺号: ' + authStore.user.id : '登录后享受更多精彩内容' }}</text>
-        </view>
-        <text class="arrow">></text>
-      </view>
-
-      <!-- VIP 黑金卡片 -->
-      <view class="vip-card">
-        <view class="vip-card-header">
-          <text class="vip-title">VIP 黄金会员</text>
-          <button class="vip-btn">立即开通</button>
-        </view>
-        <text class="vip-desc">开通即享万部大片免费看、免广告特权</text>
-      </view>
-
-      <!-- 核心服务金刚区 (横向排列) -->
-      <view class="service-section">
-        <text class="section-title">我的服务</text>
-        <view class="service-grid">
-          <view class="service-item" v-for="(item, index) in services" :key="index">
-            <view class="service-icon-box">
-              <text class="service-icon" :style="{ color: item.color }">{{ item.icon }}</text>
-            </view>
-            <text class="service-name">{{ item.name }}</text>
+    <!-- 快捷功能金刚区 -->
+    <view class="quick-nav-container">
+      <view class="quick-nav">
+        <view class="nav-item" v-for="(item, index) in menuList" :key="index" @click="handleMenuClick(item.label)">
+          <view class="icon-wrap">
+            <text class="nav-icon" :style="{color: item.color}">{{ item.icon }}</text>
           </view>
-        </view>
-      </view>
-
-      <!-- 纵向列表菜单区 -->
-      <view class="menu-list">
-        <view class="menu-item" v-for="(item, index) in tools" :key="index" :class="{ 'no-border': index === tools.length - 1 && !authStore.isLogin }">
-          <view class="menu-left">
-            <text class="menu-icon">{{ item.icon }}</text>
-            <text class="menu-name">{{ item.name }}</text>
-          </view>
-          <view class="menu-right">
-            <text v-if="item.desc !== ''" class="menu-desc">{{ item.desc }}</text>
-            <text class="arrow">></text>
-          </view>
-        </view>
-        <view class="menu-item no-border" v-if="authStore.isLogin" @click="handleLogout">
-          <view class="menu-left">
-            <text class="menu-icon" style="color:#ff3b30">🚪</text>
-            <text class="menu-name" style="color:#ff3b30">退出登录</text>
-          </view>
+          <text class="nav-label">{{ item.label }}</text>
         </view>
       </view>
     </view>
+
+    <!-- 列表选项区 -->
+    <view class="list-section">
+      <view class="list-item" @click="handleMenuClick('我的预约')">
+        <text class="list-title">我的预约</text>
+        <text class="list-arrow">></text>
+      </view>
+      <view class="list-item" @click="handleMenuClick('帮助与客服')">
+        <text class="list-title">帮助与客服</text>
+        <text class="list-arrow">></text>
+      </view>
+      <view class="list-item border-none" @click="handleMenuClick('关于我们')">
+        <text class="list-title">关于我们</text>
+        <text class="list-arrow">></text>
+      </view>
+    </view>
+
+    <!-- 退出登录按钮 (仅登录后可见) -->
+    <button class="logout-btn" v-if="authStore.isLoggedIn" @click="handleLogout">
+      <text class="logout-text">退出登录</text>
+    </button>
   </scroll-view>
 </template>
 
 <script setup lang="uts">
 import { ref } from 'vue'
-import { useAuthStore } from '../../store/auth'
+import { useAuthStore } from '../../store/auth.uts'
 
+// 初始化全局认证状态管理
 const authStore = useAuthStore()
+// 组件挂载时尝试从本地缓存恢复登录态
+// authStore.initAuth() 会在 App.uvue 或入口处执行，这里直接使用 state
 
-const handleLoginClick = () => {
-  if (!authStore.isLogin) {
-    uni.navigateTo({ url: '/pages/login/login' })
-  }
+/**
+ * 快捷导航数据配置
+ */
+const menuList = [
+  { icon: '🕒', label: '历史记录', color: '#60a5fa' },
+  { icon: '⭐', label: '我的收藏', color: '#facc15' },
+  { icon: '⬇️', label: '我的下载', color: '#4ade80' },
+  { icon: '❤️', label: '我的点赞', color: '#f87171' }
+]
+
+/**
+ * 跳转到登录页面
+ */
+const goToLogin = () => {
+  uni.navigateTo({ url: '/pages/login/login' })
 }
 
+/**
+ * 跳转到设置页面 (待实现)
+ */
+const goToSettings = () => {
+  uni.showToast({ title: '设置功能开发中', icon: 'none' })
+}
+
+/**
+ * 通用菜单点击提示
+ */
+const handleMenuClick = (label: string) => {
+  uni.showToast({ title: '点击: ' + label, icon: 'none' })
+}
+
+/**
+ * 退出登录逻辑
+ */
 const handleLogout = () => {
   uni.showModal({
     title: '提示',
@@ -86,23 +118,11 @@ const handleLogout = () => {
     success: (res) => {
       if (res.confirm) {
         authStore.logout()
+        uni.showToast({ title: '已退出登录', icon: 'success' })
       }
     }
   })
 }
-
-const services = [
-  { icon: '⏱️', color: '#fb923c', name: '观看历史' },
-  { icon: '⭐', color: '#facc15', name: '我的收藏' },
-  { icon: '⬇️', color: '#60a5fa', name: '离线缓存' },
-  { icon: '▶️', color: '#4ade80', name: '稍后再看' },
-]
-
-const tools = [
-  { icon: '👛', name: '我的钱包', desc: '领红包' },
-  { icon: '🎧', name: '联系客服', desc: '' },
-  { icon: '⚙️', name: '设置', desc: '' },
-]
 </script>
 
 <style>
@@ -113,190 +133,220 @@ const tools = [
   background-color: #121212;
   height: 100%;
 }
-.header-actions {
+
+/* 头部样式 */
+.header-section {
+  padding: 60px 24px 32px 24px;
+  background-image: linear-gradient(to bottom, rgba(0, 204, 51, 0.2), transparent);
+}
+
+.header-top {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 40px 16px 16px 16px;
-  background-color: transparent;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
-.action-left {
-  display: flex;
-}
-.action-right {
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-}
-.action-icon {
-  font-size: 24px;
-  color: #ffffff;
-  margin-left: 16px;
-}
-.content-wrapper {
-  padding: 0 16px 80px 16px;
+  margin-bottom: 24px;
 }
 
-/* 用户头部信息区 */
-.user-info-section {
+.page-title {
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: bold;
+  font-style: italic;
+  letter-spacing: 2px;
+}
+
+.settings-icon {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 用户信息框 */
+.user-info-box {
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin-bottom: 24px;
-  margin-top: 8px;
 }
+
+.not-logged-in {
+  opacity: 0.9;
+}
+
 .avatar {
   width: 64px;
   height: 64px;
   border-radius: 32px;
-  background-color: #333333;
   border-width: 2px;
-  border-color: rgba(255,255,255,0.1);
+  border-color: #00cc33;
   border-style: solid;
 }
-.user-text-box {
-  flex: 1;
+
+.default-avatar {
+  background-color: #333333;
+  border-color: #555555;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.default-avatar-text {
+  color: #888888;
+  font-size: 14px;
+}
+
+.info-content {
+  margin-left: 16px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  margin-left: 16px;
+  flex: 1;
 }
-.user-name {
+
+.nickname {
+  color: #ffffff;
   font-size: 20px;
   font-weight: bold;
-  color: #ffffff;
+  margin-bottom: 6px;
 }
-.user-id {
+
+.vip-badge {
+  background-color: #e8c081;
+  padding: 2px 8px;
+  border-radius: 4px;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.vip-icon {
+  font-size: 10px;
+  margin-right: 4px;
+}
+
+.vip-text {
+  color: #3a280c;
   font-size: 12px;
-  color: #888888;
-  margin-top: 4px;
+  font-weight: bold;
 }
-.arrow {
+
+.normal-user {
+  color: #888888;
+  font-size: 12px;
+}
+
+.login-prompt {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.login-desc {
+  color: #888888;
+  font-size: 12px;
+}
+
+.arrow-icon {
+  color: #888888;
+  font-size: 18px;
+  margin-left: auto;
+}
+
+/* 快捷导航金刚区 */
+.quick-nav-container {
+  padding: 0 16px;
+  margin-bottom: 24px;
+}
+
+.quick-nav {
+  background-color: #1f1f1f;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 24px;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.nav-icon {
+  font-size: 24px;
+}
+
+.nav-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+}
+
+/* 列表区 */
+.list-section {
+  padding: 0 16px;
+}
+
+.list-item {
+  background-color: #1f1f1f;
+  padding: 16px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom-width: 1px;
+  border-bottom-color: #333333;
+  border-bottom-style: solid;
+}
+
+.list-item:first-child {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.border-none {
+  border-bottom-width: 0;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.list-title {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.list-arrow {
   color: #888888;
   font-size: 16px;
 }
 
-/* VIP 黑金卡片 */
-.vip-card {
-  width: 100%;
-  background-image: linear-gradient(to right, #e8c081, #b3853b);
+/* 退出登录 */
+.logout-btn {
+  margin: 24px 16px;
+  background-color: rgba(255, 77, 79, 0.1);
+  padding: 12px 0;
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 24px;
-}
-.vip-card-header {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  margin-bottom: 12px;
-}
-.vip-title {
-  color: #3a280c;
-  font-size: 18px;
-  font-weight: bold;
-  font-style: italic;
-}
-.vip-btn {
-  background-color: #3a280c;
-  color: #e8c081;
-  font-size: 12px;
-  font-weight: bold;
-  border-radius: 16px;
-  padding: 4px 12px;
-  margin: 0;
-  line-height: 1.5;
-}
-.vip-desc {
-  color: #593d14;
-  font-size: 12px;
-  font-weight: bold;
 }
 
-/* 核心服务金刚区 */
-.service-section {
-  background-color: #1f1f1f;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 24px;
-}
-.section-title {
+.logout-text {
+  color: #ff4d4f;
   font-size: 14px;
   font-weight: bold;
-  color: rgba(255,255,255,0.9);
-  margin-bottom: 16px;
-}
-.service-grid {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-.service-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.service-icon-box {
-  background-color: rgba(255,255,255,0.05);
-  padding: 12px;
-  border-radius: 16px;
-  margin-bottom: 8px;
-}
-.service-icon {
-  font-size: 28px;
-}
-.service-name {
-  font-size: 12px;
-  color: #888888;
-  font-weight: bold;
-}
-
-/* 纵向列表菜单区 */
-.menu-list {
-  background-color: #1f1f1f;
-  border-radius: 12px;
-  overflow: hidden;
-}
-.menu-item {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border-bottom-width: 1px;
-  border-bottom-color: rgba(255,255,255,0.05);
-  border-bottom-style: solid;
-}
-.no-border {
-  border-bottom-width: 0;
-}
-.menu-left {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-.menu-icon {
-  font-size: 20px;
-  color: #888888;
-  margin-right: 12px;
-}
-.menu-name {
-  font-size: 14px;
-  font-weight: bold;
-  color: rgba(255,255,255,0.9);
-}
-.menu-right {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-.menu-desc {
-  font-size: 12px;
-  color: #888888;
-  margin-right: 8px;
 }
 </style>

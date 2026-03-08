@@ -1,113 +1,116 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Smartphone } from 'lucide-react';
-import useAuthStore from '@/store/auth';
+import { ChevronLeft, Loader2 } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 
+/**
+ * 登录页面组件
+ * 提供账号密码模拟登录功能，登录成功后更新全局状态并返回上一页
+ */
 export const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuthStore();
-  const [phone, setPhone] = useState('13800138000');
-  const [code, setCode] = useState('');
-  const [isSending, setIsSending] = useState(false);
-  const [countdown, setCountdown] = useState(60);
+  // 使用 zustand 全局状态
+  const login = useAuthStore((state) => state.login);
 
-  const handleSendCode = () => {
-    if (phone.length !== 11) return alert('请输入正确的手机号');
-    setIsSending(true);
-    let timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setIsSending(false);
-          return 60;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    alert('验证码已发送: 1234');
-    setCode('1234'); // 自动填入以便测试
-  };
+  // 局部表单状态
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = () => {
-    if (phone.length === 11 && code.length >= 4) {
-      login({ id: '12345678', name: 'VIP用户', isVip: true, avatar: 'https://dummyimage.com/100x100/e8c081/333&text=VIP' });
+  /**
+   * 处理登录表单提交逻辑
+   * 模拟异步请求，如果账号和密码不为空则认为成功
+   */
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phone || !password) {
+      setError('请输入手机号和密码');
+      return;
+    }
+    setError('');
+    setLoading(true);
+
+    // 模拟网络请求延迟
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    // 模拟获取用户数据并更新全局状态
+    login({
+      id: 'u10001',
+      nickname: `用户_${phone.slice(-4)}`,
+      avatar: 'https://dummyimage.com/100x100/333/fff&text=VIP',
+      isVip: true,
+      vipExpireTime: '2025-12-31',
+    });
+
+    setLoading(false);
+    // 登录成功后返回来源页面或首页
+    if (window.history.length > 1) {
       navigate(-1);
     } else {
-      alert('请输入正确的手机号和验证码');
+      navigate('/');
     }
   };
 
   return (
-    <div className="w-full min-h-screen bg-dark-bg text-dark-text flex flex-col fixed inset-0 z-[100] animate-fade-in">
-      <div className="p-4 flex justify-between items-center">
-        <X size={24} className="text-white cursor-pointer" onClick={() => navigate(-1)} />
-        <span className="text-sm text-dark-muted">帮助</span>
+    <div className="w-full min-h-screen bg-[#121212] text-white flex flex-col relative">
+      {/* 顶部导航 */}
+      <div className="flex items-center p-4 absolute top-0 left-0 right-0 z-10">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-8 h-8 flex items-center justify-center rounded-full bg-black/40 text-white/80 active:scale-90 transition-transform"
+        >
+          <ChevronLeft size={20} />
+        </button>
       </div>
 
-      <div className="px-8 mt-10">
-        <h1 className="text-2xl font-bold text-white mb-2">手机号快捷登录</h1>
-        <p className="text-sm text-dark-muted mb-10">未注册的手机号验证后自动创建爱奇艺账号</p>
+      {/* 登录主体表单区域 */}
+      <div className="flex-1 flex flex-col justify-center px-8 pb-20">
+        <h1 className="text-3xl font-bold mb-2 text-[#00cc33] italic tracking-wider">iQIYI</h1>
+        <h2 className="text-xl font-bold mb-8 text-white/90">欢迎回来，即刻开启精彩视界</h2>
 
-        <div className="flex flex-col gap-6">
-          <div className="flex items-center border-b border-gray-700 pb-2">
-            <span className="text-white text-lg font-medium mr-4">+86</span>
+        <form onSubmit={handleLogin} className="flex flex-col gap-5">
+          {/* 手机号输入框 */}
+          <div className="flex flex-col gap-1">
             <input
               type="tel"
-              maxLength={11}
-              className="flex-1 bg-transparent text-white text-lg outline-none placeholder:text-gray-600"
               placeholder="请输入手机号"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              className="w-full bg-transparent border-b border-gray-700 pb-2 text-lg focus:outline-none focus:border-[#00cc33] transition-colors placeholder:text-gray-600"
             />
           </div>
 
-          <div className="flex items-center border-b border-gray-700 pb-2">
+          {/* 密码输入框 */}
+          <div className="flex flex-col gap-1 relative">
             <input
-              type="text"
-              maxLength={6}
-              className="flex-1 bg-transparent text-white text-lg outline-none placeholder:text-gray-600"
-              placeholder="请输入验证码"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
+              type="password"
+              placeholder="请输入密码"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-transparent border-b border-gray-700 pb-2 text-lg focus:outline-none focus:border-[#00cc33] transition-colors placeholder:text-gray-600"
             />
-            <button
-              className={`text-sm ${isSending ? 'text-gray-500' : 'text-brand'} font-medium`}
-              onClick={handleSendCode}
-              disabled={isSending}
-            >
-              {isSending ? `${countdown}s 后重新获取` : '获取验证码'}
-            </button>
           </div>
 
+          {/* 错误提示区域 */}
+          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+
+          {/* 登录按钮 */}
           <button
-            className={`w-full py-3 rounded-full text-base font-bold mt-6 transition-colors ${
-              phone.length === 11 && code.length >= 4
-                ? 'bg-brand text-black'
-                : 'bg-gray-800 text-gray-500'
+            type="submit"
+            disabled={loading}
+            className={`mt-6 w-full py-3.5 rounded-full font-bold text-white shadow-lg transition-all flex items-center justify-center gap-2 ${
+              loading ? 'bg-[#00cc33]/50 cursor-not-allowed' : 'bg-[#00cc33] active:scale-[0.98]'
             }`}
-            onClick={handleLogin}
           >
-            登录/注册
+            {loading ? <Loader2 size={20} className="animate-spin" /> : '登 录'}
           </button>
-        </div>
+        </form>
 
-        <div className="mt-8 text-center text-xs text-dark-muted">
-          登录即代表同意 <span className="text-brand">《爱奇艺服务协议》</span> 和 <span className="text-brand">《隐私政策》</span>
-        </div>
-
-        <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center">
-          <span className="text-xs text-gray-500 mb-4">其他登录方式</span>
-          <div className="flex gap-6">
-            <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center text-green-500">
-              <Smartphone size={24} /> {/* 微信占位 */}
-            </div>
-            <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center text-blue-400">
-              <Smartphone size={24} /> {/* QQ占位 */}
-            </div>
-            <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center text-white">
-              <Smartphone size={24} /> {/* 苹果占位 */}
-            </div>
-          </div>
+        <div className="mt-8 flex justify-center gap-4 text-sm text-gray-500">
+          <span>忘记密码</span>
+          <span>|</span>
+          <span>注册账号</span>
         </div>
       </div>
     </div>
