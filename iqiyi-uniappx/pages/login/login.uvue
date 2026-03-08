@@ -18,7 +18,12 @@
       </view>
 
       <view class="form-group">
-        <input class="input-field" type="password" placeholder="请输入密码" v-model="password" placeholder-class="placeholder-style" />
+                <view class="input-wrapper">
+          <input class="input-field code-input" type="number" placeholder="请输入验证码" v-model="code" placeholder-class="placeholder-style" maxlength="6" />
+          <text class="get-code-btn" :class="countdown > 0 || phone.length === 0 ? 'btn-disabled' : ''" @click="handleGetCode">
+            {{ countdown > 0 ? countdown + 's 后重新获取' : '获取验证码' }}
+          </text>
+        </view>
       </view>
 
       <!-- 错误提示文本 -->
@@ -41,14 +46,36 @@
 
 <script setup lang="uts">
 import { ref } from 'vue'
+import { onUnload } from '@dcloudio/uni-app'
 import { useAuthStore } from '../../store/auth.uts'
 
 const authStore = useAuthStore()
 // 表单绑定状态
 const phone = ref('')
-const password = ref('')
+const code = ref('')
+const countdown = ref(0)
 const loading = ref(false)
 const error = ref('')
+let timer: number = 0
+
+// 获取验证码逻辑
+const handleGetCode = () => {
+  if (phone.value.length < 11) {
+    uni.showToast({ title: '请输入有效的手机号', icon: 'none' })
+    return
+  }
+  if (countdown.value > 0) return
+
+  countdown.value = 60
+  timer = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      clearInterval(timer)
+      timer = 0
+    }
+  }, 1000) as number
+}
+
 
 /**
  * 原生返回上一页
@@ -62,8 +89,8 @@ const goBack = () => {
  * 校验输入 -> 设置加载状态 -> 延迟模拟请求 -> 状态同步存储 -> 路由回退
  */
 const handleLogin = () => {
-  if (!phone.value || !password.value) {
-    error.value = '请输入手机号和密码'
+  if (!phone.value || !code.value) {
+    error.value = '请输入手机号和验证码'
     return
   }
   error.value = ''
@@ -87,6 +114,11 @@ const handleLogin = () => {
     }, 1000)
   }, 1500)
 }
+onUnload(() => {
+  if (timer > 0) {
+    clearInterval(timer);
+  }
+});
 </script>
 
 <style>

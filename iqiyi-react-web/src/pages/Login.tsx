@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
@@ -14,18 +14,48 @@ export const Login = () => {
 
   // 局部表单状态
   const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [countdown, setCountdown] = useState(0);
+  const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
+
+  // 清除定时器
+  useEffect(() => {
+    return () => {
+      if (timerId) clearInterval(timerId);
+    };
+  }, [timerId]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // 获取验证码逻辑
+  const handleGetCode = () => {
+    if (!phone || phone.length < 11) {
+      setError('请输入有效的手机号');
+      return;
+    }
+    setError('');
+    setCountdown(60);
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setTimerId(null);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    setTimerId(timer);
+  };
+
   /**
    * 处理登录表单提交逻辑
-   * 模拟异步请求，如果账号和密码不为空则认为成功
+   * 模拟异步请求，如果账号和验证码不为空则认为成功
    */
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone || !password) {
-      setError('请输入手机号和密码');
+    if (!phone || !code) {
+      setError('请输入手机号和验证码');
       return;
     }
     setError('');
@@ -78,15 +108,26 @@ export const Login = () => {
             />
           </div>
 
-          {/* 密码输入框 */}
+          {/* 验证码输入框 */}
           <div className="flex flex-col gap-1 relative">
-            <input
-              type="password"
-              placeholder="请输入密码"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-transparent border-b border-gray-700 pb-2 text-lg focus:outline-none focus:border-[#00cc33] transition-colors placeholder:text-gray-600"
-            />
+            <div className="flex items-end border-b border-gray-700 pb-2">
+              <input
+                type="text"
+                placeholder="请输入验证码"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                maxLength={6}
+                className="flex-1 bg-transparent text-lg focus:outline-none focus:border-[#00cc33] transition-colors placeholder:text-gray-600"
+              />
+              <button
+                type="button"
+                onClick={handleGetCode}
+                disabled={countdown > 0 || !phone}
+                className={`text-sm ml-2 whitespace-nowrap ${countdown > 0 ? 'text-gray-500' : 'text-[#00cc33] active:opacity-80'}`}
+              >
+                {countdown > 0 ? `${countdown}s 后重新获取` : '获取验证码'}
+              </button>
+            </div>
           </div>
 
           {/* 错误提示区域 */}
