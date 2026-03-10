@@ -1,0 +1,38 @@
+/**
+ * Fisher-Yates 洗牌算法，用于高效地将数组元素打乱
+ * 比使用 Array.sort(() => Math.random() - 0.5) 性能更好，分布更均匀
+ */
+export function shuffle<T>(array: T[]): T[] {
+  let currentIndex = array.length,  randomIndex: number;
+
+  // While there remain elements to shuffle.
+  while (currentIndex != 0) {
+
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+
+  return array;
+}
+
+/**
+ * 格式化播放量：将超过10000的数字转为“W”
+ */
+export function formatCount(count: number): string {
+  if (count > 10000) return (count / 10000).toFixed(1) + 'w';
+  return count.toString();
+}
+
+/**
+ * 格式化视频时长 (秒转 mm:ss)
+ */
+export function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60)
+  const s = Math.floor(seconds % 60)
+  return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`
+}

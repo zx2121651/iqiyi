@@ -169,10 +169,12 @@
 
 <script setup lang="uts">
 import { videoDetailMockData } from '../../mock/videoDetail.uts'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
 import { useAuthStore } from '../../store/auth.uts'
 
 const authStore = useAuthStore()
+let id = ''
 // 视频相关控制和选集状态
 const playbackRate = ref(1.0)
 const quality = ref('1080P')
@@ -296,6 +298,15 @@ const checkLogin = () => {
 /**
  * 提交发表评论
  */
+
+
+onLoad((options: any) => {
+  id = options['id'] as string || '1'
+})
+
+onMounted(() => {
+  videoContext = uni.createVideoContext('myVideo', null as any)
+})
 
 const handleInputClick = () => {
   if (!authStore.isLoggedIn) {

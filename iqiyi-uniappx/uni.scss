@@ -1,0 +1,41 @@
+/**
+ * uni-app x 官方预定义的 CSS 变量和混合库
+ * 可以在这里配置项目的全局颜色、边距等主题样式
+ */
+$uni-color-primary: #00cc33; /* 主品牌色：爱奇艺绿 */
+$uni-color-success: #00cc33;
+$uni-color-warning: #f0ad4e;
+$uni-color-error: #dd524d;
+
+$uni-text-color:#ffffff;
+$uni-text-color-inverse:#121212;
+$uni-text-color-grey:#888888;
+$uni-text-color-placeholder: #555555;
+$uni-text-color-disable:#c0c0c0;
+
+$uni-bg-color:#121212; /* 页面底色 */
+$uni-bg-color-grey:#1f1f1f;
+$uni-bg-color-hover:#333333;
+$uni-bg-color-mask:rgba(0, 0, 0, 0.4);
+
+/* 边框颜色 */
+$uni-border-color:#333333;
+
+/* 尺寸相关 */
+$uni-font-size-sm:12px;
+$uni-font-size-base:14px;
+$uni-font-size-lg:16px;
+
+$uni-spacing-row-sm: 5px;
+$uni-spacing-row-base: 10px;
+$uni-spacing-row-lg: 15px;
+
+$uni-spacing-col-sm: 4px;
+$uni-spacing-col-base: 8px;
+$uni-spacing-col-lg: 12px;
+
+$uni-opacity-disabled: 0.3;
+$uni-border-radius-sm: 4px;
+$uni-border-radius-base: 6px;
+$uni-border-radius-lg: 12px;
+$uni-border-radius-circle: 50%;

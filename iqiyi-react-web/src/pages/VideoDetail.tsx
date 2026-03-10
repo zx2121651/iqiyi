@@ -232,7 +232,7 @@ export const VideoDetail = () => {
     }
     // 卸载组件时清理定时器
     return () => clearInterval(interval);
-  }, [danmakuList, loading, detail]);
+  }, [danmakuList, loading, detail, danmakuEnabled]);
 
   // 提前返回必须写在所有 Hooks 之后，以符合 React Hooks 规则
   if (loading || !detail) {
