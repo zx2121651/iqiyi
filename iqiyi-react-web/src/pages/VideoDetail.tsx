@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import request from '@/utils/request';
-import { ChevronLeft, Share2, Heart, Star, Download, MessageSquare } from 'lucide-react';
+import { ChevronLeft, Share2, Heart, Star, Download, MessageSquare, Send, MonitorPlay, PictureInPicture2, Settings2, PlayCircle, ListVideo } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 
 interface VideoDetailData {
   id: string;
@@ -25,17 +26,28 @@ interface RelatedVideo {
   duration: string;
 }
 
+/**
+ * 视频详情页面组件
+ * 包含：播放器、视频信息展示、操作按钮、评论区及更多相关推荐
+ */
 export const VideoDetail = () => {
+  // 从路由参数中获取视频 id
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  // 详情数据和推荐列表状态
   const [detail, setDetail] = useState<VideoDetailData | null>(null);
   const [related, setRelated] = useState<RelatedVideo[]>([]);
   const [loading, setLoading] = useState(true);
 
+  /**
+   * 初始化数据请求
+   * 当 id 发生变化时，请求新的视频详情及相关推荐数据
+   */
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        // 并发请求视频详情及相关视频列表
         const [detailData, relatedData] = await Promise.all([
           request.get<any, VideoDetailData>(`/video/detail?id=${id || '1'}`),
           request.get<any, RelatedVideo[]>('/video/related'),
@@ -43,7 +55,7 @@ export const VideoDetail = () => {
         setDetail(detailData);
         setRelated(relatedData);
       } catch (error) {
-        console.error('Failed to load video detail:', error);
+        console.error('获取视频详情失败:', error);
       } finally {
         setLoading(false);
       }
@@ -51,21 +63,99 @@ export const VideoDetail = () => {
     fetchData();
   }, [id]);
 
+  /**
+   * 格式化数量显示（将超万数字转为带 "w" 的格式）
+   */
   const formatCount = (count: number) => {
     if (count > 10000) return (count / 10000).toFixed(1) + 'w';
     return count.toString();
   };
 
-  if (loading || !detail) {
-    return <div className="flex h-screen w-full items-center justify-center bg-[#121212] text-white">加载中...</div>;
-  }
+  // 引入全局状态，用于获取用户信息以支持发表评论功能
+  const { isLoggedIn, userInfo } = useAuthStore();
 
-  const [comments] = useState([
+  // 模拟评论数据，改为可变状态以便发表新评论
+  const [comments, setComments] = useState([
     { id: 1, user: '用户A', avatar: 'https://dummyimage.com/100x100/333/fff&text=A', content: '这个视频拍得太好了！', time: '2小时前' },
     { id: 2, user: '用户B', avatar: 'https://dummyimage.com/100x100/444/fff&text=B', content: '剧情很紧凑，推荐大家看。', time: '5小时前' },
     { id: 3, user: '用户C', avatar: 'https://dummyimage.com/100x100/555/fff&text=C', content: '绝了绝了，一口气看完！', time: '1天前' },
   ]);
 
+  // 评论输入框的值
+  const [commentText, setCommentText] = useState('');
+
+  // 播放控制状态
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [quality, setQuality] = useState('1080P');
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  const [danmakuEnabled, setDanmakuEnabled] = useState(true);
+
+  // 选集数据
+  const episodes = Array.from({length: 20}, (_, i) => i + 1);
+  const [currentEpisode, setCurrentEpisode] = useState(1);
+
+  // 记忆播放位置
+  useEffect(() => {
+    if (videoRef.current && detail) {
+      const savedTime = localStorage.getItem(`video_time_${detail.id}`);
+      if (savedTime) {
+        videoRef.current.currentTime = parseFloat(savedTime);
+      }
+    }
+  }, [detail]);
+
+  // 定期保存播放位置
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !detail) return;
+
+    const handleTimeUpdate = () => {
+      localStorage.setItem(`video_time_${detail.id}`, video.currentTime.toString());
+    };
+
+    // 监听播放结束，模拟自动播放下一集
+    const handleEnded = () => {
+      if (currentEpisode < episodes.length) {
+        setCurrentEpisode(prev => prev + 1);
+        // 模拟重新加载视频逻辑
+        video.currentTime = 0;
+        video.play().catch(e => console.error("Auto play failed:", e));
+      }
+    };
+
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('ended', handleEnded);
+
+    return () => {
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('ended', handleEnded);
+    };
+  }, [detail, currentEpisode, episodes.length]);
+
+  // 修改倍速
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = playbackRate;
+    }
+  }, [playbackRate]);
+
+  // 处理画中画
+  const togglePiP = async () => {
+    if (!videoRef.current) return;
+    try {
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+      } else {
+        await videoRef.current.requestPictureInPicture();
+      }
+    } catch (error) {
+      console.error('画中画失败:', error);
+      alert('您的浏览器不支持或被阻止了画中画功能');
+    }
+  };
+
+  // 模拟弹幕数据源
   const [danmakuList] = useState([
     { text: '前方高能', time: 2, color: '#ff0000' },
     { text: '绝了', time: 4, color: '#ffffff' },
@@ -74,31 +164,80 @@ export const VideoDetail = () => {
     { text: '来了来了', time: 1, color: '#ffffff' },
   ]);
 
+  // 用于获取视频元素，以便读取 currentTime 控制弹幕
   const videoRef = useRef<HTMLVideoElement>(null);
+  // 当前正在屏幕上展示的弹幕列表状态
   const [currentDanmaku, setCurrentDanmaku] = useState<{text:string, color:string, top:number, id:number}[]>([]);
 
+  /**
+   * 发表评论逻辑
+   * 未登录跳转到登录页，已登录则组装新评论插入列表顶部
+   */
+  const handlePostComment = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!isLoggedIn || !userInfo) {
+      alert('请先登录后再发表评论');
+      navigate('/login');
+      return;
+    }
+    if (!commentText.trim()) {
+      return;
+    }
+
+    const newComment = {
+      id: Date.now(),
+      user: userInfo.nickname,
+      avatar: userInfo.avatar,
+      content: commentText.trim(),
+      time: '刚刚'
+    };
+
+    // 插入新评论到顶部
+    setComments([newComment, ...comments]);
+    setCommentText('');
+
+    // 同步更新详情的评论数
+    setDetail(prev => prev ? { ...prev, commentCount: prev.commentCount + 1 } : prev);
+  };
+
+  /**
+   * 简易弹幕逻辑实现
+   * 通过定时器监听视频当前播放时间，筛选出需要显示的弹幕进行挂载
+   */
   useEffect(() => {
     let interval: any;
+    // 只有在视频元素就绪，且未处于加载中状态时，开启定时器
     if (videoRef.current && !loading && detail) {
       interval = setInterval(() => {
+        // 如果视频不存在或处于暂停状态，则不触发弹幕
         if (!videoRef.current || videoRef.current.paused) return;
+
         const time = Math.floor(videoRef.current.currentTime);
+        // 查找属于当前秒的弹幕，附加随机垂直位置与唯一ID
         const newDanmaku = danmakuList.filter(d => d.time === time).map((d, i) => ({
           ...d,
-          top: Math.random() * 60 + 10, // random top percentage
+          top: Math.random() * 60 + 10, // 垂直位置随机 10% ~ 70%
           id: Date.now() + i
         }));
-        if (newDanmaku.length > 0) {
+
+        if (newDanmaku.length > 0 && danmakuEnabled) {
+          // 追加新的弹幕节点
           setCurrentDanmaku(prev => [...prev, ...newDanmaku]);
-          // clean up old
+          // 4 秒后（动画执行完毕后），自动清理这些弹幕节点避免 DOM 臃肿
           setTimeout(() => {
              setCurrentDanmaku(prev => prev.filter(p => !newDanmaku.find(n => n.id === p.id)));
           }, 4000);
         }
-      }, 1000);
+      }, 1000); // 每秒检查一次
     }
+    // 卸载组件时清理定时器
     return () => clearInterval(interval);
-  }, [danmakuList, loading, detail]);
+  }, [danmakuList, loading, detail, danmakuEnabled]);
+
+  // 提前返回必须写在所有 Hooks 之后，以符合 React Hooks 规则
+  if (loading || !detail) {
+    return <div className="flex h-screen w-full items-center justify-center bg-[#121212] text-white">加载中...</div>;
+  }
 
   return (
     <div className="w-full min-h-screen bg-[#121212] text-dark-text pb-6">
@@ -151,6 +290,92 @@ export const VideoDetail = () => {
         </div>
       </div>
 
+      {/* 视频下方控制条 & 选集 & 互动区 */}
+      <div className="bg-[#1a1a1a] pb-2 border-b border-gray-800">
+        {/* 播放器控制外围栏 */}
+        <div className="flex items-center justify-between px-4 py-3 text-sm text-gray-300">
+          {/* 左侧控制 */}
+          <div className="flex items-center gap-5">
+            <div className="flex items-center gap-1 cursor-pointer active:text-white" onClick={togglePiP}>
+              <PictureInPicture2 size={18} />
+              <span className="text-xs">小窗</span>
+            </div>
+            <div className="flex items-center gap-1 cursor-pointer active:text-white" onClick={() => alert('寻找投屏设备中...')}>
+              <MonitorPlay size={18} />
+              <span className="text-xs">投屏</span>
+            </div>
+          </div>
+
+          {/* 右侧控制 (倍速、清晰度) */}
+          <div className="flex items-center gap-4 relative">
+            {/* 倍速 */}
+            <div className="relative">
+              <span
+                className="cursor-pointer font-medium active:text-[#00cc33] transition-colors"
+                onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+              >
+                {playbackRate === 1 ? '倍速' : `${playbackRate}x`}
+              </span>
+              {showSpeedMenu && (
+                <div className="absolute bottom-full right-0 mb-2 bg-[#2a2a2a] rounded-lg shadow-lg py-2 flex flex-col items-center z-50 text-xs w-16">
+                  {[2.0, 1.5, 1.25, 1.0].map(rate => (
+                    <div
+                      key={rate}
+                      className={`py-2 w-full text-center cursor-pointer hover:bg-[#3a3a3a] ${playbackRate === rate ? 'text-[#00cc33]' : 'text-gray-300'}`}
+                      onClick={() => { setPlaybackRate(rate); setShowSpeedMenu(false); }}
+                    >
+                      {rate}x
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 清晰度 */}
+            <div className="relative">
+              <span
+                className="cursor-pointer font-bold text-[#00cc33]"
+                onClick={() => setShowQualityMenu(!showQualityMenu)}
+              >
+                {quality}
+              </span>
+              {showQualityMenu && (
+                <div className="absolute bottom-full right-0 mb-2 bg-[#2a2a2a] rounded-lg shadow-lg py-2 flex flex-col items-center z-50 w-20 text-xs">
+                  {['4K', '1080P', '720P', '480P'].map(q => (
+                    <div
+                      key={q}
+                      className={`py-2 w-full text-center cursor-pointer hover:bg-[#3a3a3a] ${quality === q ? 'text-[#00cc33]' : 'text-gray-300'}`}
+                      onClick={() => { setQuality(q); setShowQualityMenu(false); }}
+                    >
+                      {q}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 选集区 */}
+        <div className="px-4 py-2">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-bold text-white/90">选集</span>
+            <span className="text-xs text-gray-400">更新至 {episodes.length} 集</span>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {episodes.map(ep => (
+              <div
+                key={ep}
+                onClick={() => setCurrentEpisode(ep)}
+                className={`flex-shrink-0 w-[60px] h-[60px] flex items-center justify-center rounded-lg cursor-pointer transition-colors ${currentEpisode === ep ? 'bg-[#00cc33]/20 text-[#00cc33] border border-[#00cc33]/50 font-bold' : 'bg-[#2a2a2a] text-gray-300 hover:bg-[#3a3a3a]'}`}
+              >
+                {ep}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* 视频详情区域 */}
       <div className="p-4">
         <h1 className="text-xl font-bold leading-tight mb-2 text-white/90">{detail.title}</h1>
@@ -159,6 +384,24 @@ export const VideoDetail = () => {
           <span className="text-brand font-bold text-sm">{detail.score}分</span>
           <span>{detail.year}</span>
           <span>{formatCount(detail.playCount)}次播放</span>
+        </div>
+
+        {/* 弹幕控制与发弹幕按钮 */}
+        <div className="flex items-center gap-3 mb-4 mt-2">
+          <div
+            onClick={() => setDanmakuEnabled(!danmakuEnabled)}
+            className={`w-10 h-5 rounded-full relative cursor-pointer transition-colors ${danmakuEnabled ? 'bg-[#00cc33]' : 'bg-gray-600'}`}
+          >
+            <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${danmakuEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+          </div>
+          <span className="text-xs text-gray-400">{danmakuEnabled ? '弹幕开' : '弹幕关'}</span>
+
+          <div
+            className="flex-1 bg-[#1f1f1f] rounded-full h-8 flex items-center px-3 cursor-pointer"
+            onClick={() => document.getElementById('comment-input')?.focus()}
+          >
+            <span className="text-xs text-gray-500">点我发弹幕...</span>
+          </div>
         </div>
 
         {/* 标签 */}
@@ -223,7 +466,7 @@ export const VideoDetail = () => {
         </div>
 
         {/* 更多推荐列表 */}
-        <div>
+        <div className="mb-20">
           <h3 className="text-base font-bold mb-3 text-white/90">更多推荐</h3>
           <div className="flex flex-col gap-3">
             {related.map((item) => (
@@ -251,6 +494,38 @@ export const VideoDetail = () => {
           </div>
         </div>
 
+      </div>
+
+      {/* 固定在底部的评论输入区域 */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#1f1f1f] p-3 border-t border-gray-800 flex items-center gap-3 z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.5)]">
+        {isLoggedIn ? (
+          <img src={userInfo?.avatar} alt="avatar" className="w-8 h-8 rounded-full flex-shrink-0 border border-gray-700" />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-gray-700 flex-shrink-0 border border-gray-600 flex items-center justify-center" onClick={() => navigate('/login')}>
+            <span className="text-[10px] text-gray-400">未登录</span>
+          </div>
+        )}
+
+        <form onSubmit={handlePostComment} className="flex-1 flex items-center bg-black/40 rounded-full px-4 py-2 border border-gray-700 focus-within:border-[#00cc33] transition-colors">
+          <input
+            id="comment-input"
+            type="text"
+            placeholder={isLoggedIn ? "发条评论友善交流..." : "点击登录后发表评论..."}
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            readOnly={!isLoggedIn}
+            onClick={() => { if (!isLoggedIn) navigate('/login'); }}
+            className="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder:text-gray-500 disabled:opacity-50"
+          />
+        </form>
+
+        <button
+          onClick={handlePostComment}
+          disabled={!commentText.trim() || !isLoggedIn}
+          className="text-[#00cc33] disabled:text-gray-600 p-2 active:scale-90 transition-transform"
+        >
+          <Send size={20} />
+        </button>
       </div>
     </div>
   );

@@ -1,104 +1,124 @@
 <template>
   <view class="container">
-    <view class="header">
-      <text class="back-icon" @click="goBack">✕</text>
-      <text class="help-text">帮助</text>
+    <!-- 顶部导航栏 -->
+    <view class="nav-bar">
+      <view class="back-btn" @click="goBack">
+        <text class="back-icon">&lt;</text>
+      </view>
     </view>
 
-    <view class="content">
-      <text class="title">手机号快捷登录</text>
-      <text class="subtitle">未注册的手机号验证后自动创建爱奇艺账号</text>
+    <!-- 登录主体内容区 -->
+    <view class="login-body">
+      <text class="logo-title">iQIYI</text>
+      <text class="welcome-text">欢迎回来，即刻开启精彩视界</text>
+
+      <!-- 登录表单 -->
+      <view class="form-group">
+        <input class="input-field" type="number" placeholder="请输入手机号" v-model="phone" placeholder-class="placeholder-style" />
+      </view>
 
       <view class="form-group">
-        <view class="input-row border-bottom">
-          <text class="country-code">+86</text>
-          <input class="input-field" type="number" placeholder="请输入手机号" placeholder-style="color:#666" maxlength="11" v-model="phone" />
-        </view>
-
-        <view class="input-row border-bottom">
-          <input class="input-field" type="number" placeholder="请输入验证码" placeholder-style="color:#666" maxlength="6" v-model="code" />
-          <text class="get-code-btn" :class="{'disabled-text': isSending}" @click="handleSendCode">
-            {{ isSending ? countdown + 's 后重新获取' : '获取验证码' }}
+                <view class="input-wrapper">
+          <input class="input-field code-input" type="number" placeholder="请输入验证码" v-model="code" placeholder-class="placeholder-style" maxlength="6" />
+          <text class="get-code-btn" :class="countdown > 0 || phone.length === 0 ? 'btn-disabled' : ''" @click="handleGetCode">
+            {{ countdown > 0 ? countdown + 's 后重新获取' : '获取验证码' }}
           </text>
         </view>
-
-        <view class="login-btn-wrap" @click="handleLogin">
-          <text class="login-btn" :class="{'active-btn': canLogin}">登录/注册</text>
-        </view>
       </view>
 
-      <view class="agreement">
-        <text class="agree-text">登录即代表同意 <text class="brand-text">《爱奇艺服务协议》</text> 和 <text class="brand-text">《隐私政策》</text></text>
-      </view>
+      <!-- 错误提示文本 -->
+      <text v-if="error" class="error-text">{{ error }}</text>
 
-      <view class="other-login">
-        <text class="other-text">其他登录方式</text>
-        <view class="social-icons">
-          <view class="social-icon"><text class="icon-wx">微信</text></view>
-          <view class="social-icon"><text class="icon-qq">QQ</text></view>
-          <view class="social-icon"><text class="icon-apple">Apple</text></view>
-        </view>
+      <!-- 登录按钮 -->
+      <button class="login-btn" :class="{'btn-loading': loading}" @click="handleLogin" :disabled="loading">
+        <text class="btn-text">{{ loading ? '登录中...' : '登 录' }}</text>
+      </button>
+
+      <!-- 其他选项 -->
+      <view class="other-links">
+        <text class="link-text">忘记密码</text>
+        <text class="link-divider">|</text>
+        <text class="link-text">注册账号</text>
       </view>
     </view>
   </view>
 </template>
 
 <script setup lang="uts">
-import { ref, computed } from 'vue'
-import { useAuthStore } from '../../store/auth'
+import { ref } from 'vue'
+import { onUnload } from '@dcloudio/uni-app'
+import { useAuthStore } from '../../store/auth.uts'
 
 const authStore = useAuthStore()
-
-const phone = ref('13800138000')
+// 表单绑定状态
+const phone = ref('')
 const code = ref('')
-const isSending = ref(false)
-const countdown = ref(60)
+const countdown = ref(0)
+const loading = ref(false)
+const error = ref('')
+let timer: number = 0
 
-const canLogin = computed((): boolean => {
-  return phone.value.length == 11 && code.value.length >= 4
-})
+// 获取验证码逻辑
+const handleGetCode = () => {
+  if (phone.value.length < 11) {
+    uni.showToast({ title: '请输入有效的手机号', icon: 'none' })
+    return
+  }
+  if (countdown.value > 0) return
 
+  countdown.value = 60
+  timer = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      clearInterval(timer)
+      timer = 0
+    }
+  }, 1000) as number
+}
+
+
+/**
+ * 原生返回上一页
+ */
 const goBack = () => {
   uni.navigateBack({ delta: 1 })
 }
 
-const handleSendCode = () => {
-  if (phone.value.length !== 11) {
-    uni.showToast({ title: '请输入正确的手机号', icon: 'none' })
-    return
-  }
-  if (isSending.value) return
-
-  isSending.value = true
-  uni.showToast({ title: '验证码已发送: 1234', icon: 'none' })
-  code.value = '1234'
-
-  let timer = setInterval(() => {
-    if (countdown.value <= 1) {
-      clearInterval(timer)
-      isSending.value = false
-      countdown.value = 60
-    } else {
-      countdown.value -= 1
-    }
-  }, 1000)
-}
-
+/**
+ * 模拟登录逻辑
+ * 校验输入 -> 设置加载状态 -> 延迟模拟请求 -> 状态同步存储 -> 路由回退
+ */
 const handleLogin = () => {
-  if (!canLogin.value) {
-    uni.showToast({ title: '请输入正确的手机号和验证码', icon: 'none' })
+  if (!phone.value || !code.value) {
+    error.value = '请输入手机号和验证码'
     return
   }
+  error.value = ''
+  loading.value = true
 
-  authStore.login({
-    id: '12345678',
-    name: 'VIP用户',
-    isVip: true,
-    avatar: 'https://dummyimage.com/100x100/e8c081/333&text=VIP'
-  })
+  // 模拟网络请求延迟
+  setTimeout(() => {
+    // 调用 Pinia Action 更新并持久化状态
+    authStore.login({
+      id: 'u10001',
+      nickname: `用户_${phone.value.slice(-4)}`,
+      avatar: 'https://dummyimage.com/100x100/333/fff&text=VIP',
+      isVip: true,
+      vipExpireTime: '2025-12-31'
+    })
 
-  uni.navigateBack({ delta: 1 })
+    loading.value = false
+    uni.showToast({ title: '登录成功', icon: 'success' })
+    setTimeout(() => {
+      uni.navigateBack({ delta: 1 })
+    }, 1000)
+  }, 1500)
 }
+onUnload(() => {
+  if (timer > 0) {
+    clearInterval(timer);
+  }
+});
 </script>
 
 <style>
@@ -109,139 +129,124 @@ const handleLogin = () => {
   background-color: #121212;
   height: 100%;
 }
-.header {
+
+.nav-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  padding: 40px 16px 0 16px;
+  z-index: 100;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
   align-items: center;
-  padding: 40px 16px 16px 16px;
-}
-.back-icon {
-  color: #ffffff;
-  font-size: 24px;
-}
-.help-text {
-  color: #888888;
-  font-size: 14px;
 }
 
-.content {
-  padding: 40px 32px 0 32px;
+.back-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.back-icon {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.login-body {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  padding: 0 32px;
+  margin-top: -80px; /* 向上偏移一点让视觉中心居中 */
 }
-.title {
-  color: #ffffff;
-  font-size: 24px;
+
+.logo-title {
+  color: #00cc33;
+  font-size: 32px;
   font-weight: bold;
+  font-style: italic;
   margin-bottom: 8px;
+  letter-spacing: 2px;
 }
-.subtitle {
-  color: #888888;
-  font-size: 14px;
-  margin-bottom: 40px;
+
+.welcome-text {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 32px;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-}
-.input-row {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding-bottom: 8px;
   margin-bottom: 24px;
-}
-.border-bottom {
   border-bottom-width: 1px;
   border-bottom-color: #333333;
   border-bottom-style: solid;
 }
-.country-code {
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: bold;
-  margin-right: 16px;
-}
+
 .input-field {
-  flex: 1;
+  width: 100%;
+  height: 48px;
   color: #ffffff;
   font-size: 18px;
   background-color: transparent;
-  border: none;
-}
-.get-code-btn {
-  color: #00cc33;
-  font-size: 14px;
-  font-weight: bold;
-}
-.disabled-text {
-  color: #888888;
+  padding-bottom: 8px;
 }
 
-.login-btn-wrap {
-  width: 100%;
-  margin-top: 24px;
-}
-.login-btn {
-  width: 100%;
-  background-color: #333333;
-  color: #888888;
-  text-align: center;
-  padding: 12px 0;
-  border-radius: 24px;
-  font-size: 16px;
-  font-weight: bold;
-}
-.active-btn {
-  background-color: #00cc33;
-  color: #000000;
+.placeholder-style {
+  color: #666666;
 }
 
-.agreement {
-  margin-top: 32px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.agree-text {
-  color: #888888;
-  font-size: 12px;
-}
-.brand-text {
-  color: #00cc33;
-}
-
-.other-login {
-  position: absolute;
-  bottom: 40px;
-  left: 0;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.other-text {
-  color: #888888;
+.error-text {
+  color: #ff4d4f;
   font-size: 12px;
   margin-bottom: 16px;
 }
-.social-icons {
-  display: flex;
-  flex-direction: row;
-}
-.social-icon {
-  width: 48px;
+
+.login-btn {
+  width: 100%;
   height: 48px;
-  background-color: #333333;
   border-radius: 24px;
+  background-color: #00cc33;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 12px;
+  margin-top: 16px;
 }
-.icon-wx { color: #4ade80; font-size: 12px; }
-.icon-qq { color: #60a5fa; font-size: 12px; }
-.icon-apple { color: #ffffff; font-size: 12px; }
+
+.btn-loading {
+  background-color: rgba(0, 204, 51, 0.5);
+}
+
+.btn-text {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.other-links {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 32px;
+}
+
+.link-text {
+  color: #888888;
+  font-size: 14px;
+}
+
+.link-divider {
+  color: #555555;
+  font-size: 14px;
+  margin: 0 16px;
+}
 </style>

@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import request from '@/utils/request';
-import { Heart, MessageCircle, Share2, Plus } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Plus, Link as LinkIcon, Download, MoreHorizontal, X } from 'lucide-react';
 
 interface ShortVideoData {
   id: string;
@@ -19,11 +19,18 @@ interface ShortVideoData {
  * 使用 CSS Scroll Snap 实现全屏上下滑动切换短视频
  */
 export const ShortVideo = () => {
+  // 定义状态：短视频列表、加载状态、当前正在播放的视频索引
   const [videos, setVideos] = useState<ShortVideoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
+  // 滚动容器的引用，用于计算当前可见的视频
   const containerRef = useRef<HTMLDivElement>(null);
+  // 控制分享面板显示隐藏的状态
+  const [showSharePanel, setShowSharePanel] = useState(false);
 
+  /**
+   * 初始化加载短视频列表数据
+   */
   useEffect(() => {
     const fetchVideos = async () => {
       try {
@@ -31,7 +38,7 @@ export const ShortVideo = () => {
         const res = await request.get<any, ShortVideoData[]>('/short-video/list');
         setVideos(res);
       } catch (error) {
-        console.error('Failed to load short videos:', error);
+        console.error('获取短视频列表失败:', error);
       } finally {
         setLoading(false);
       }
@@ -39,11 +46,18 @@ export const ShortVideo = () => {
     fetchVideos();
   }, []);
 
+  /**
+   * 格式化数量显示（过万转换）
+   */
   const formatCount = (count: number) => {
     if (count > 10000) return (count / 10000).toFixed(1) + 'w';
     return count.toString();
   };
 
+  /**
+   * 处理点赞逻辑
+   * 找到对应 id 的视频，切换 isLiked 状态并增减点赞数
+   */
   const handleLike = (id: string) => {
     setVideos(videos.map(v =>
       v.id === id
@@ -52,9 +66,15 @@ export const ShortVideo = () => {
     ));
   };
 
+  /**
+   * 监听容器的滚动事件
+   * 通过计算 scrollTop 和视口高度 clientHeight 的比值，
+   * 得出当前吸附显示在视口中央的视频索引，并更新 activeIndex 触发播放/暂停
+   */
   const handleScroll = () => {
     if (!containerRef.current) return;
     const { scrollTop, clientHeight } = containerRef.current;
+    // 四舍五入计算当前索引
     const index = Math.round(scrollTop / clientHeight);
     if (index !== activeIndex) {
       setActiveIndex(index);
@@ -125,8 +145,8 @@ export const ShortVideo = () => {
             </div>
 
             {/* 分享 */}
-            <div className="flex flex-col items-center gap-1">
-              <Share2 size={32} color="white" className="drop-shadow-md" />
+            <div className="flex flex-col items-center gap-1 cursor-pointer" onClick={() => setShowSharePanel(true)}>
+              <Share2 size={32} color="white" className="drop-shadow-md active:scale-90 transition-transform" />
               <span className="text-white text-xs font-semibold drop-shadow-md">{formatCount(item.shareCount)}</span>
             </div>
           </div>
@@ -145,6 +165,81 @@ export const ShortVideo = () => {
           </div>
         </div>
       ))}
+
+      {/* 底部弹出分享面板 */}
+      {showSharePanel && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end">
+          {/* 半透明遮罩层 */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowSharePanel(false)}
+          ></div>
+
+          {/* 面板内容 */}
+          <div className="relative bg-[#1f1f1f] rounded-t-2xl px-4 pt-6 pb-8 animate-slide-up shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-white font-bold">分享到</h3>
+              <button onClick={() => setShowSharePanel(false)} className="text-gray-400 p-1">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="flex justify-around mb-6">
+              <div className="flex flex-col items-center gap-2 cursor-pointer active:scale-95" onClick={() => alert('模拟分享至微信好友')}>
+                <div className="w-12 h-12 rounded-full bg-[#09B83E] flex items-center justify-center shadow-lg shadow-[#09B83E]/20">
+                  <MessageCircle size={24} color="white" />
+                </div>
+                <span className="text-xs text-gray-300">微信好友</span>
+              </div>
+              <div className="flex flex-col items-center gap-2 cursor-pointer active:scale-95" onClick={() => alert('模拟分享至朋友圈')}>
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#09B83E] to-[#068A2E] flex items-center justify-center shadow-lg shadow-[#09B83E]/20">
+                  <div className="w-6 h-6 border-2 border-white rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  </div>
+                </div>
+                <span className="text-xs text-gray-300">朋友圈</span>
+              </div>
+              <div className="flex flex-col items-center gap-2 cursor-pointer active:scale-95" onClick={() => { alert('链接已复制'); setShowSharePanel(false); }}>
+                <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center">
+                  <LinkIcon size={20} color="white" />
+                </div>
+                <span className="text-xs text-gray-300">复制链接</span>
+              </div>
+            </div>
+
+            <div className="flex gap-6 border-t border-gray-800 pt-6 overflow-x-auto no-scrollbar pb-2">
+               <div className="flex flex-col items-center gap-2 shrink-0 cursor-pointer">
+                  <div className="w-10 h-10 rounded-full bg-black/40 border border-gray-700 flex items-center justify-center">
+                    <Download size={18} className="text-gray-300" />
+                  </div>
+                  <span className="text-[10px] text-gray-400">保存本地</span>
+               </div>
+               <div className="flex flex-col items-center gap-2 shrink-0 cursor-pointer">
+                  <div className="w-10 h-10 rounded-full bg-black/40 border border-gray-700 flex items-center justify-center">
+                    <MoreHorizontal size={18} className="text-gray-300" />
+                  </div>
+                  <span className="text-[10px] text-gray-400">更多</span>
+               </div>
+            </div>
+
+            <button
+              className="w-full mt-6 py-3 rounded-full bg-gray-800 text-white font-medium"
+              onClick={() => setShowSharePanel(false)}
+            >
+              取消
+            </button>
+          </div>
+          <style>{`
+            @keyframes slideUp {
+              from { transform: translateY(100%); }
+              to { transform: translateY(0); }
+            }
+            .animate-slide-up {
+              animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+          `}</style>
+        </div>
+      )}
     </div>
   );
 };

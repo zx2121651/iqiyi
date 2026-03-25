@@ -1,113 +1,133 @@
-
-import { Settings, Bell, Scan, ChevronRight, PlaySquare, Star, Clock, Download, Wallet, Headphones, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import useAuthStore from '@/store/auth';
+import { Settings, Clock, Star, Download, Heart, Crown, ChevronRight, History, Bell, MessageSquare } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 
+/**
+ * 个人中心 (我的) 页面组件
+ * 展示用户基本信息、VIP状态，以及各类快捷入口菜单
+ */
 export const Profile = () => {
   const navigate = useNavigate();
-  const { isLogin, user, logout } = useAuthStore();
+  // 从全局状态获取登录态和用户信息
+  const { isLoggedIn, userInfo, logout } = useAuthStore();
 
-  const services = [
-    { icon: <Clock size={28} className="text-orange-400" />, name: '观看历史' },
-    { icon: <Star size={28} className="text-yellow-400" />, name: '我的收藏' },
-    { icon: <Download size={28} className="text-blue-400" />, name: '离线缓存' },
-    { icon: <PlaySquare size={28} className="text-green-400" />, name: '稍后再看' },
-  ];
-
-  const tools = [
-    { icon: <Wallet size={24} className="text-dark-muted" />, name: '我的钱包', desc: '领红包' },
-    { icon: <Headphones size={24} className="text-dark-muted" />, name: '联系客服', desc: '' },
-    { icon: <Settings size={24} className="text-dark-muted" />, name: '设置', desc: '' },
+  /**
+   * 功能入口列表配置
+   */
+  const menuList = [
+    { icon: <Clock size={24} className="text-blue-400" />, label: '历史记录' },
+    { icon: <Star size={24} className="text-yellow-400" />, label: '我的收藏' },
+    { icon: <Download size={24} className="text-green-400" />, label: '我的下载' },
+    { icon: <Heart size={24} className="text-red-400" />, label: '我的点赞' },
   ];
 
   return (
-    <div className="w-full min-h-screen bg-[#121212] text-dark-text pb-20 overflow-y-auto no-scrollbar relative">
-      {/* 顶部透明状态栏和操作区 */}
-      <div className="flex justify-between items-center px-4 pt-10 pb-4 bg-transparent sticky top-0 z-50">
-        <div className="flex gap-4">
-          <Scan size={24} />
+    <div className="w-full min-h-screen bg-[#121212] text-white pb-20">
+      {/* 头部区域：根据登录态展示不同的内容 */}
+      <div className="relative pt-12 pb-6 px-6 bg-gradient-to-b from-brand/20 to-transparent">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold italic tracking-wide">我的</h1>
+          <button className="p-2" onClick={() => navigate('/settings')}>
+            <Settings size={20} className="text-white/80" />
+          </button>
         </div>
-        <div className="flex gap-4">
-          <Bell size={24} />
-          <Settings size={24} />
+
+        {isLoggedIn && userInfo ? (
+          // 已登录展示
+          <div className="flex items-center gap-4">
+            <img src={userInfo.avatar} alt="avatar" className="w-16 h-16 rounded-full border-2 border-brand" />
+            <div className="flex flex-col gap-1 flex-1">
+              <h2 className="text-xl font-bold">{userInfo.nickname}</h2>
+              {userInfo.isVip ? (
+                <span className="text-xs bg-[#e8c081] text-[#3a280c] px-2 py-0.5 rounded flex items-center gap-1 self-start font-bold">
+                  <Crown size={12} /> VIP会员 (至 {userInfo.vipExpireTime})
+                </span>
+              ) : (
+                <span className="text-xs text-gray-400">普通用户</span>
+              )}
+            </div>
+          </div>
+        ) : (
+          // 未登录展示
+          <div className="flex items-center gap-4 cursor-pointer" onClick={() => navigate('/login')}>
+            <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center border-2 border-gray-600">
+              <span className="text-gray-400 text-sm">未登录</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <h2 className="text-xl font-bold">点击登录/注册</h2>
+              <span className="text-xs text-gray-400">登录后畅享高清画质及多端同步记录</span>
+            </div>
+            <ChevronRight className="ml-auto text-gray-500" />
+          </div>
+        )}
+      </div>
+
+      {/* 快捷金刚区菜单 */}
+      <div className="px-4 mb-6">
+        <div className="bg-[#1f1f1f] rounded-xl p-4 flex justify-between items-center shadow-lg">
+          {menuList.map((item, index) => (
+            <div key={index} className="flex flex-col items-center gap-2 cursor-pointer active:scale-95 transition-transform">
+              <div className="w-12 h-12 rounded-full bg-black/30 flex items-center justify-center">
+                {item.icon}
+              </div>
+              <span className="text-xs text-gray-300">{item.label}</span>
+            </div>
+          ))}
         </div>
       </div>
 
+      {/* 其他功能列表 */}
       <div className="px-4">
-        {/* 用户头部信息区 */}
-        <div
-          className="flex items-center gap-4 mb-6 mt-2 cursor-pointer"
-          onClick={() => !isLogin && navigate('/login')}
-        >
-          <div className="w-16 h-16 rounded-full bg-gray-700 overflow-hidden shadow-lg border-2 border-white/10 flex-shrink-0">
-            <img src={isLogin && user?.avatar ? user.avatar : "https://dummyimage.com/100x100/333/fff&text=Guest"} alt="avatar" className="w-full h-full object-cover" />
+        <div className="bg-[#1f1f1f] rounded-xl overflow-hidden">
+          <div className="px-4 py-4 border-b border-gray-800 flex justify-between items-center cursor-pointer active:bg-white/5">
+            <span className="text-sm font-medium">我的预约</span>
+            <ChevronRight size={16} className="text-gray-500" />
           </div>
-          <div className="flex flex-col justify-center flex-1 overflow-hidden">
-            <h1 className="text-xl font-bold text-white truncate">{isLogin ? user?.name : '点击登录/注册'}</h1>
-            <p className="text-xs text-dark-muted mt-1 truncate">{isLogin ? `爱奇艺号: ${user?.id}` : '登录后享受更多精彩内容'}</p>
+          <div className="px-4 py-4 border-b border-gray-800 flex justify-between items-center cursor-pointer active:bg-white/5">
+            <span className="text-sm font-medium">帮助与客服</span>
+            <ChevronRight size={16} className="text-gray-500" />
           </div>
-          <ChevronRight className="text-dark-muted flex-shrink-0" />
-        </div>
-
-        {/* VIP 黑金卡片 */}
-        <div className="w-full bg-gradient-to-r from-[#e8c081] to-[#b3853b] rounded-xl p-4 mb-6 shadow-[0_4px_20px_rgba(212,175,55,0.2)] relative overflow-hidden">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
-          <div className="flex justify-between items-center mb-3">
-            <h2 className="text-[#3a280c] text-lg font-black italic">VIP 黄金会员</h2>
-            <button className="bg-[#3a280c] text-[#e8c081] text-xs font-bold px-3 py-1.5 rounded-full shadow-md active:scale-95 transition-transform">
-              立即开通
-            </button>
-          </div>
-          <p className="text-[#593d14] text-xs font-medium">开通即享万部大片免费看、免广告特权</p>
-        </div>
-
-        {/* 核心服务金刚区 (横向滚动) */}
-        <div className="bg-[#1f1f1f] rounded-xl p-4 mb-6 shadow-sm">
-          <h3 className="text-sm font-bold mb-4 text-white/90">我的服务</h3>
-          <div className="flex justify-between">
-            {services.map((item, idx) => (
-              <div key={idx} className="flex flex-col items-center gap-2 cursor-pointer active:opacity-70 transition-opacity">
-                <div className="bg-white/5 p-3 rounded-2xl">
-                  {item.icon}
-                </div>
-                <span className="text-xs text-dark-muted font-medium">{item.name}</span>
-              </div>
-            ))}
+          <div className="px-4 py-4 flex justify-between items-center cursor-pointer active:bg-white/5">
+            <span className="text-sm font-medium">关于我们</span>
+            <ChevronRight size={16} className="text-gray-500" />
           </div>
         </div>
 
-        {/* 纵向列表菜单区 */}
-        <div className="bg-[#1f1f1f] rounded-xl overflow-hidden shadow-sm">
-          {tools.map((item, idx) => (
+        <div className="bg-[#1a1a1a] rounded-xl overflow-hidden mt-6 mb-8">
+          {[
+            { icon: <History size={22} className="text-gray-400" />, title: '观看历史' },
+            { icon: <Star size={22} className="text-gray-400" />, title: '我的收藏' },
+            { icon: <Download size={22} className="text-gray-400" />, title: '离线缓存' },
+            { icon: <Bell size={22} className="text-gray-400" />, title: '消息通知' },
+            { icon: <MessageSquare size={22} className="text-gray-400" />, title: '帮助与反馈' },
+            { icon: <Settings size={22} className="text-gray-400" />, title: '系统设置' },
+          ].map((item, index) => (
             <div
-              key={idx}
-              className={`flex items-center justify-between p-4 cursor-pointer active:bg-white/5 transition-colors ${idx !== tools.length - 1 || isLogin ? 'border-b border-white/5' : ''}`}
+              key={item.title}
+              className={`flex items-center justify-between p-4 bg-[#222222] active:bg-[#333333] transition-colors cursor-pointer ${
+                index !== 5 ? 'border-b border-gray-800' : ''
+              }`}
             >
               <div className="flex items-center gap-3">
                 {item.icon}
-                <span className="text-sm font-medium text-white/90">{item.name}</span>
+                <span className="text-white text-[15px]">{item.title}</span>
               </div>
-              <div className="flex items-center gap-2">
-                {item.desc && <span className="text-xs text-dark-muted">{item.desc}</span>}
-                <ChevronRight size={18} className="text-dark-muted" />
-              </div>
+              <ChevronRight size={20} className="text-gray-500" />
             </div>
           ))}
-          {isLogin && (
-            <div
-              className="flex items-center justify-center p-4 cursor-pointer active:bg-white/5 transition-colors text-red-500 gap-2"
-              onClick={() => {
-                if (window.confirm('确定要退出登录吗？')) {
-                  logout();
-                }
-              }}
-            >
-              <LogOut size={18} />
-              <span className="text-sm font-medium">退出登录</span>
-            </div>
-          )}
         </div>
 
+        {/* 退出登录按钮 */}
+        {isLoggedIn && (
+          <button
+            onClick={() => {
+              logout();
+            }}
+            className="w-full mt-6 py-3 rounded-xl bg-red-500/10 text-red-500 font-bold text-sm active:bg-red-500/20 transition-colors"
+          >
+            退出登录
+          </button>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,16 @@
+import { createSSRApp } from 'vue'
+import * as Pinia from 'pinia'
+import App from './App.uvue'
+
+export function createApp() {
+  const app = createSSRApp(App)
+
+  // 注册全局状态管理 Pinia
+  const pinia = Pinia.createPinia()
+  app.use(pinia)
+
+  return {
+    app,
+    Pinia
+  }
+}

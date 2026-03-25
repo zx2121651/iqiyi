@@ -19,8 +19,38 @@
         :danmu-list="danmuList"
         enable-danmu="true"
         danmu-btn="true"
+        @timeupdate="onVideoTimeUpdate"
+        @ended="onVideoEnded"
+        :initial-time="getSavedTime()"
         object-fit="contain">
       </video>
+    </view>
+
+    <!-- 播放器控制外围栏 & 选集 -->
+    <view class="controls-container">
+      <view class="controls-top">
+        <view class="controls-left">
+          <text class="control-btn" @click="togglePiP">📺 小窗</text>
+          <text class="control-btn" @click="handleCast">📡 投屏</text>
+        </view>
+        <view class="controls-right">
+          <text class="control-btn" @click="changeSpeed">{{ playbackRate == 1 ? '倍速' : playbackRate + 'x' }}</text>
+          <text class="control-btn highlight" @click="changeQuality">{{ quality }}</text>
+        </view>
+      </view>
+
+      <!-- 选集区 -->
+      <scroll-view class="episode-list" scroll-x="true" show-scrollbar="false">
+        <view
+          class="episode-item"
+          v-for="ep in episodes"
+          :key="ep"
+          :class="{'episode-active': currentEpisode == ep}"
+          @click="selectEpisode(ep)"
+        >
+          <text class="episode-text" :class="{'episode-text-active': currentEpisode == ep}">{{ ep }}</text>
+        </view>
+      </scroll-view>
     </view>
 
     <scroll-view class="content-scroll" scroll-y="true">
@@ -90,7 +120,7 @@
       </view>
 
       <!-- 更多推荐 -->
-      <view class="recommend-section">
+      <view class="recommend-section" style="padding-bottom: 80px;">
         <text class="recommend-header">更多推荐</text>
         <view class="related-list">
           <view class="related-item" v-for="(item, index) in related" :key="index" @click="reloadPage(item.id)">
@@ -106,22 +136,121 @@
         </view>
       </view>
     </scroll-view>
+
+    <!-- 底部发表评论操作区 -->
+    <view class="fixed-bottom-comment">
+      <!-- 头像区域 (已登录显示头像，未登录显示占位符) -->
+      <image v-if="authStore.isLoggedIn" class="my-avatar" :src="authStore.userInfo?.avatar || ''" mode="aspectFill"></image>
+      <view v-else class="my-avatar no-avatar" @click="checkLogin">
+        <text class="no-avatar-text">未登录</text>
+      </view>
+
+      <!-- 输入框 -->
+      <view class="input-container" @click="handleInputClick">
+        <input
+          class="comment-input"
+          type="text"
+          v-model="commentText"
+          :placeholder="authStore.isLoggedIn ? '发条评论友善交流...' : '点击登录后发表评论...'"
+          placeholder-class="comment-placeholder"
+          :disabled="!authStore.isLoggedIn"
+          @confirm="submitComment"
+          confirm-type="send"
+        />
+      </view>
+
+      <!-- 发送按钮 -->
+      <view class="send-btn" @click="submitComment">
+        <text class="send-icon" :style="{ color: (!commentText || !authStore.isLoggedIn) ? '#666666' : '#00cc33' }">发送</text>
+      </view>
+    </view>
   </view>
 </template>
 
 <script setup lang="uts">
 import { videoDetailMockData } from '../../mock/videoDetail.uts'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
+import { useAuthStore } from '../../store/auth.uts'
 
+const authStore = useAuthStore()
+let id = ''
+// 视频相关控制和选集状态
+const playbackRate = ref(1.0)
+const quality = ref('1080P')
+const danmakuEnabled = ref(true)
+const episodes = ref<number[]>([1,2,3,4,5,6,7,8,9,10,11,12])
+const currentEpisode = ref(1)
+let videoContext: any = null
+
+const onVideoTimeUpdate = (e: any) => {
+  if (id) {
+    const time = e.detail.currentTime
+    uni.setStorageSync(`video_time_${id}`, time)
+  }
+}
+
+const getSavedTime = (): number => {
+  if (!id) return 0
+  const saved = uni.getStorageSync(`video_time_${id}`)
+  return saved ? Number(saved) : 0
+}
+
+const onVideoEnded = () => {
+  if (currentEpisode.value < episodes.value.length) {
+    currentEpisode.value += 1
+    uni.showToast({ title: '即将播放下一集', icon: 'none' })
+  }
+}
+
+const togglePiP = () => {
+  uni.showToast({ title: '小窗播放功能请求...', icon: 'none' })
+}
+
+const handleCast = () => {
+  uni.showToast({ title: '寻找投屏设备中...', icon: 'none' })
+}
+
+const changeSpeed = () => {
+  const speeds = [1.0, 1.25, 1.5, 2.0]
+  let nextIdx = speeds.indexOf(playbackRate.value) + 1
+  if (nextIdx >= speeds.length) nextIdx = 0
+  playbackRate.value = speeds[nextIdx]
+
+  if (videoContext != null) {
+    try {
+      videoContext!.playbackRate(playbackRate.value)
+    } catch(e) {}
+  }
+}
+
+const changeQuality = () => {
+  const qs = ['480P', '720P', '1080P', '4K']
+  let nextIdx = qs.indexOf(quality.value) + 1
+  if (nextIdx >= qs.length) nextIdx = 0
+  quality.value = qs[nextIdx]
+  uni.showToast({ title: `已切换至 ${quality.value}`, icon: 'none' })
+}
+
+const selectEpisode = (ep: number) => {
+  currentEpisode.value = ep
+}
+
+// 视频详情与相关推荐数据源
 const detail = ref(videoDetailMockData.detail)
 const related = ref(videoDetailMockData.related)
 
+// 新增评论绑定的双向文本
+const commentText = ref('')
+
+// 模拟的评论列表
 const comments = ref([
   { id: 1, user: '用户A', avatar: 'https://dummyimage.com/100x100/333/fff&text=A', content: '这个视频拍得太好了！', time: '2小时前' },
   { id: 2, user: '用户B', avatar: 'https://dummyimage.com/100x100/444/fff&text=B', content: '剧情很紧凑，推荐大家看。', time: '5小时前' },
   { id: 3, user: '用户C', avatar: 'https://dummyimage.com/100x100/555/fff&text=C', content: '绝了绝了，一口气看完！', time: '1天前' },
 ])
 
+// 模拟内置弹幕列表数据，供原生 video 组件解析播放
 const danmuList = ref([
   { text: '前方高能', color: '#ff0000', time: 2 },
   { text: '绝了', color: '#ffffff', time: 4 },
@@ -130,6 +259,10 @@ const danmuList = ref([
   { text: '来了来了', color: '#ffffff', time: 1 },
 ])
 
+/**
+ * 格式化播放量和评论数
+ * 大于一万显示 'w'，否则显示具体数值
+ */
 const formatCount = (count: number): string => {
   if (count > 10000) {
     return (count / 10000).toFixed(1) + 'w';
@@ -137,17 +270,142 @@ const formatCount = (count: number): string => {
   return count.toString();
 }
 
+/**
+ * 原生返回上一页
+ */
 const goBack = () => {
   uni.navigateBack({ delta: 1 })
 }
 
+/**
+ * 点击相关推荐时重新加载页面数据
+ * @param id 要跳转的新视频 ID
+ */
 const reloadPage = (id: string) => {
-  // 模拟重新加载同一页面刷新数据 (实际项目中应替换为重新 fetch)
+  // 模拟重新加载同一页面刷新数据 (实际项目中应替换为重新发起网络请求)
   uni.showToast({ title: '加载视频 ' + id, icon: 'none' })
+}
+
+/**
+ * 校验登录并跳转
+ */
+const checkLogin = () => {
+  if (!authStore.isLoggedIn) {
+    uni.navigateTo({ url: '/pages/login/login' })
+  }
+}
+
+/**
+ * 提交发表评论
+ */
+
+
+onLoad((options: any) => {
+  id = options['id'] as string || '1'
+})
+
+onMounted(() => {
+  videoContext = uni.createVideoContext('myVideo', null as any)
+})
+
+const handleInputClick = () => {
+  if (!authStore.isLoggedIn) {
+    uni.navigateTo({ url: '/pages/login/login' });
+  }
+};
+
+const submitComment = () => {
+  if (!authStore.isLoggedIn) {
+    uni.showToast({ title: '请先登录', icon: 'none' })
+    uni.navigateTo({ url: '/pages/login/login' })
+    return
+  }
+  if (!commentText.value.trim()) {
+    return
+  }
+
+  // 构造新评论对象
+  const newComment = {
+    id: Date.now(),
+    user: authStore.userInfo?.nickname || '我',
+    avatar: authStore.userInfo?.avatar || 'https://dummyimage.com/100/333/fff',
+    content: commentText.value.trim(),
+    time: '刚刚'
+  }
+
+  // 插到前面
+  comments.value.unshift(newComment)
+  commentText.value = ''
+
+  // 同步更新详情计数
+  detail.value.commentCount += 1
+  uni.showToast({ title: '发表成功', icon: 'success' })
 }
 </script>
 
 <style>
+.controls-container {
+  background-color: #1a1a1a;
+  border-bottom-width: 1px;
+  border-bottom-color: #333333;
+}
+.controls-top {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+}
+.controls-left, .controls-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.control-btn {
+  color: #cccccc;
+  font-size: 13px;
+  margin-right: 20px;
+}
+.controls-right .control-btn {
+  margin-right: 0;
+  margin-left: 20px;
+}
+.highlight {
+  color: #00cc33;
+  font-weight: bold;
+}
+.episode-list {
+  display: flex;
+  flex-direction: row;
+  padding: 0 16px 12px 16px;
+  width: 100%;
+  white-space: nowrap;
+}
+.episode-item {
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-width: 1px;
+  border-color: transparent;
+}
+.episode-active {
+  background-color: rgba(0, 204, 51, 0.1);
+  border-color: rgba(0, 204, 51, 0.5);
+}
+.episode-text {
+  color: #cccccc;
+  font-size: 16px;
+}
+.episode-text-active {
+  color: #00cc33;
+  font-weight: bold;
+}
 .container {
   display: flex;
   flex: 1;
@@ -401,5 +659,72 @@ const reloadPage = (id: string) => {
 .related-meta {
   color: #888888;
   font-size: 12px;
+}
+
+/* 底部固定评论栏 */
+.fixed-bottom-comment {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background-color: #1f1f1f;
+  border-top-width: 1px;
+  border-top-color: #333333;
+  border-top-style: solid;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 100;
+}
+.my-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  margin-right: 12px;
+}
+.no-avatar {
+  background-color: #333333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-width: 1px;
+  border-color: #555555;
+  border-style: solid;
+}
+.no-avatar-text {
+  color: #888888;
+  font-size: 10px;
+}
+.input-container {
+  flex: 1;
+  height: 36px;
+  background-color: rgba(0,0,0,0.3);
+  border-width: 1px;
+  border-color: #333333;
+  border-style: solid;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 16px;
+}
+.comment-input {
+  flex: 1;
+  color: #ffffff;
+  font-size: 14px;
+  height: 100%;
+  background-color: transparent;
+}
+.comment-placeholder {
+  color: #666666;
+}
+.send-btn {
+  padding: 8px 0 8px 16px;
+}
+.send-icon {
+  font-size: 16px;
+  font-weight: bold;
 }
 </style>
