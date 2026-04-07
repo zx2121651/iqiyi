@@ -4,6 +4,8 @@ import homeRoutes from './routes/home';
 import shortVideoRoutes from './routes/shortVideo';
 import videoRoutes from './routes/video';
 import vipRoutes from './routes/vip';
+import userRoutes from './routes/user';
+import searchRoutes from './routes/search';
 import initDB from './db/init';
 
 const app = express();
@@ -17,6 +19,8 @@ app.use('/api/home', homeRoutes);
 app.use('/api/short-video', shortVideoRoutes);
 app.use('/api/video', videoRoutes);
 app.use('/api/vip', vipRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/search', searchRoutes);
 
 app.get('/', (req, res) => {
   res.send('iQiyi Clone Backend is running.');

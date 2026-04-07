@@ -1,4 +1,10 @@
-import db, { run } from './db';
+import re
+
+with open('iqiyi-backend/src/db/init.ts', 'r', encoding='utf-8') as f:
+    content = f.read()
+
+# Fix the duplicate '};' and misplaced code by writing a clean file
+content = """import db, { run } from './db';
 
 const initDB = async () => {
   try {
@@ -207,3 +213,7 @@ const seedData = async () => {
 };
 
 export default initDB;
+"""
+
+with open('iqiyi-backend/src/db/init.ts', 'w', encoding='utf-8') as f:
+    f.write(content)
