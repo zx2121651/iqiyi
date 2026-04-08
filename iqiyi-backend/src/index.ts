@@ -6,6 +6,7 @@ import videoRoutes from './routes/video';
 import vipRoutes from './routes/vip';
 import userRoutes from './routes/user';
 import searchRoutes from './routes/search';
+import categoryRoutes from './routes/category';
 import initDB from './db/init';
 
 const app = express();
@@ -21,6 +22,7 @@ app.use('/api/video', videoRoutes);
 app.use('/api/vip', vipRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/category', categoryRoutes);
 
 app.get('/', (req, res) => {
   res.send('iQiyi Clone Backend is running.');
