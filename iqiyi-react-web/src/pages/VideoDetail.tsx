@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import request from '@/utils/request';
-import { ChevronLeft, Share2, Heart, Star, Download, MessageSquare, Send, MonitorPlay, PictureInPicture2, Settings2, PlayCircle, ListVideo } from 'lucide-react';
+import { ChevronLeft, Share2, Heart, Star, Download, MessageSquare, Send, MonitorPlay, PictureInPicture2 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 
 interface VideoDetailData {
